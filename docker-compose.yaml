@@ -25,6 +25,7 @@ services:
       - MYSQL_DATABASE=medicalplace_dev
     volumes:
       - mysql-volume:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     ports:
       - '3306:3306'
   
