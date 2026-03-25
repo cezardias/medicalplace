@@ -23,8 +23,8 @@ services:
     hostname: mysql-server
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=medicalplace_dev
+      - MYSQL_ROOT_PASSWORD=VktRkCKq4YwH
+      - MYSQL_DATABASE=medicalplace_producao
     volumes:
       - mysql-volume:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
