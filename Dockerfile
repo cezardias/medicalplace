@@ -1,7 +1,7 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 RUN apt-get update -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget ca-certificates apt-transport-https software-properties-common iputils-ping vim curl
-RUN add-apt-repository ppa:ondrej/php
+RUN DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:ondrej/php
 RUN apt-get update -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 php7.4 php7.4-curl php7.4-pdo php7.4-mbstring php7.4-iconv php7.4-tokenizer php7.4-pcov php7.4-dom php7.4-zip php7.4-mysql libapache2-mod-php7.4 supervisor
 
