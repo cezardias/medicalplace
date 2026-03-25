@@ -12,6 +12,8 @@ services:
     depends_on:
       - 'mysql'
       - 'redis'
+    volumes:
+      - ./.env:/var/www/.env
     ports:
       - '8000:80'
 

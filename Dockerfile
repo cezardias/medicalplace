@@ -23,7 +23,7 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 WORKDIR /var/www/
 COPY ./ /var/www/
-COPY ./.env.docker /var/www/.env
+# .env should be managed via volumes or manual copy on the host
 
 RUN composer install --no-interaction --no-dev --optimize-autoloader
 RUN bash -i -c 'npm install && npm run prod'
