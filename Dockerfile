@@ -17,7 +17,7 @@ RUN chmod 755 /usr/local/bin/composer
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 RUN bash -i -c 'nvm install v14.16.1'
 
-RUN mkdir -p /var/www/storage/framework/{sessions,views,cache}
+RUN mkdir -p /var/www/storage/framework/{sessions,views,cache} /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
