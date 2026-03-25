@@ -1,0 +1,15 @@
+.git
+node_modules
+vendor
+*.sql
+*.old
+*.old2
+*.orig
+.env
+.env.*
+!.env.docker
+storage/*.key
+phpunit.xml
+tests
+public/teste_*
+backup_*

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cancelamento de Agendamento</title>
+</head>
+<body>
+    <h1>Olá, {{ $params['medico'] }}</h1>
+    <p>Seu agendamento para a sala <strong>{{ $params['sala'] }}</strong> foi cancelado com sucesso.</p>
+    <p><strong>Detalhes:</strong></p>
+    <ul>
+        <li>Data: {{ $params['data'] }}</li>
+        <li>Horários: {{ implode(', ', $params['horarios']) }}</li>
+    </ul>
+    <p>Os créditos referentes a este agendamento foram devolvidos à sua conta.</p>
+    <p>Atenciosamente,<br>Equipe Medical Place</p>
+</body>
+</html>
