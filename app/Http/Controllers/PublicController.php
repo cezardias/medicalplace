@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Mail\ConfirmacaoAgendamento;
+use App\Mail\CancelamentoAgendamento;
 
 use App\PagSeguro;
 use App\Salas;

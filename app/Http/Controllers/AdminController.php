@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
-//use Auth;
+use Auth;
+use DB;
 use Mail;
 use Log;
+use App\Mail\ConfirmacaoAgendamento;
+use App\Mail\CancelamentoAgendamento;
 
 use App\PagSeguro;
 use App\UsersCards;
