@@ -23,8 +23,9 @@ if (!$user) {
     echo "Sucesso! Usuario admin criado.\n";
 } else {
     $user->role = 'administrador';
+    $user->password = Hash::make($password); // Garante que a senha seja admin123
     $user->save();
-    echo "Usuario admin ja existia, role atualizada para 'administrador'.\n";
+    echo "Usuario admin ja existia, role e senha atualizadas.\n";
 }
 
 // Criar um Medico para teste
