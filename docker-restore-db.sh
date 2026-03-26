@@ -15,8 +15,8 @@ if [ ! -f "$IFILE" ]; then
     exit 1
 fi
 
-echo "Importando $IFILE para o banco de dados medicalplace_dev..."
-docker exec -i mysql-server mysql -u root -p123456 medicalplace_dev < "$IFILE"
+echo "Importando $IFILE para o banco de dados medicalplace_producao..."
+docker exec -i mysql-server mysql -u root -pVktRkCKq4YwH medicalplace_producao < "$IFILE"
 
 if [ $? -eq 0 ]; then
     echo "Sucesso! Banco de dados restaurado."
