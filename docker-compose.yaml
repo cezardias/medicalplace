@@ -24,12 +24,14 @@ services:
 
   mysql:
     image: mysql:5.7
-    container_name: mysql-server
-    hostname: mysql-server
+    container_name: medical-db
+    hostname: medical-db
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=VktRkCKq4YwH
       - MYSQL_DATABASE=medicalplace_producao
+      - MYSQL_USER=medicalplace
+      - MYSQL_PASSWORD=VktRkCKq4YwH
     volumes:
       - mysql-volume:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
