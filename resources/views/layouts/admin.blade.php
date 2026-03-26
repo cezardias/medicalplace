@@ -580,8 +580,8 @@
             <!-- /#wrapper -->
         </div>
 
-        <script src="{{ asset('js/vendor/jquery-3.5.1.js') }}"></script>
-        <script src="{{ asset('js/vendor/jquery-ui.js') }}"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
         <script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
         <script src="https://unpkg.com/swiper/swiper-bundle.js"></script>
         <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
@@ -590,7 +590,7 @@
 
         <!--script src="{{ asset('assets/fontawesome/js/all.min.js') }}"></script-->
 
-        <script src="{{ asset('js/vendor/modernizr-3.11.2.min.js') }}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/3.11.2/modernizr.min.js"></script>
         <script src="{{ asset('assets/jquery_mask/dist/jquery.mask.min.js') }}"></script>
         <script src="{{ asset('assets/toastr-master/build/toastr.min.js') }}"></script>
         <script src="{{ asset('assets/chosen/chosen.jquery.min.js') }}"></script>
