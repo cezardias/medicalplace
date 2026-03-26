@@ -13,6 +13,7 @@ services:
       - 'mysql'
       - 'redis'
     volumes:
+      - ./:/var/www
       - ./.env:/var/www/.env
     ports:
       - '8001:80'

@@ -13,10 +13,12 @@ $user = User::where('email', $email)->first();
 
 if (!$user) {
     $user = new User();
-    $user->name = 'Administrador Sistema';
+    $user->name = 'Administrador';
+    $user->sobrenome = 'Sistema';
     $user->email = $email;
     $user->password = Hash::make($password);
-    $user->tipo = 'admin'; // Ajustar se o campo de controle de perfil for outro
+    $user->role = 'admin'; 
+    $user->status = 'ativo';
     $user->save();
     echo "Sucesso! Usuario admin criado.\n";
     echo "Email: $email\n";
