@@ -41,7 +41,7 @@
         <div class="container-fluid">
             <nav class="navbar navbar-expand-lg">
                 <!-- logo -->
-                <a href="https://medicalplace.med.br/" class="navbar-brand" title="Voltar para o site">
+                <a href="{{ url('/') }}" class="navbar-brand" title="Home">
                     <img src="{{ asset('img/logotipo/logo.png') }}" alt="" width="78">
                 </a>
                 <!-- botao expande menu -->
