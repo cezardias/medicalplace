@@ -177,19 +177,49 @@
                 <div class="doc-section">
                     <h5>2. Endpoints Disponíveis</h5>
                     
+                    <div class="mb-4">
+                        <h6 class="text-primary font-weight-bold">Módulo 1: Especialidades e Serviços</h6>
+                        <div class="ml-3">
+                            <p><span class="badge badge-primary">GET</span> <code>/api/v1/especialidades</code> - Lista especialidades ativas.</p>
+                            <p><span class="badge badge-primary">GET</span> <code>/api/v1/servicos/{esp_id}</code> - Lista procedimentos e preços por especialidade.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-primary font-weight-bold">Módulo 2: Qualificação e Leads</h6>
+                        <div class="ml-3">
+                            <p><span class="badge badge-success">POST</span> <code>/api/v1/leads/paciente</code> - Registra interesse de paciente (Nome, Telefone, Convênio).</p>
+                            <p><span class="badge badge-success">POST</span> <code>/api/v1/leads/medico</code> - Registra interesse de médico (Nome, CRM, Especialidade, Turno).</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-primary font-weight-bold">Módulo 3: Agenda e Disponibilidade (n8n/Google Agenda)</h6>
+                        <div class="ml-3">
+                            <p><span class="badge badge-primary">GET</span> <code>/api/v1/disponibilidade</code> - Consulta horários livres (Filtros: data, termo).</p>
+                            <p><span class="badge badge-success">POST</span> <code>/api/v1/agendamento/reservar</code> - Bloqueia horário temporariamente (v1).</p>
+                            <p><span class="badge badge-warning">PATCH</span> <code>/api/v1/agendamento/confirmar</code> - Confirma reserva após Sync com Google Agenda.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-primary font-weight-bold">Módulo 4: Base de Conhecimento</h6>
+                        <div class="ml-3">
+                            <p><span class="badge badge-primary">GET</span> <code>/api/v1/regras/locacao</code> - Retorna termos e condições vigentes.</p>
+                            <p><span class="badge badge-primary">GET</span> <code>/api/v1/unidades</code> - Lista endereços e horários de funcionamento.</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
                     <div class="mb-3">
                         <h6><span class="badge badge-primary">GET</span> <code>/api/v1/salas</code></h6>
-                        <p>Retorna a lista de todas as salas cadastradas.</p>
+                        <p>Retorna a lista de todas as salas cadastradas (Legado).</p>
                     </div>
 
                     <div class="mb-3">
                         <h6><span class="badge badge-primary">GET</span> <code>/api/v1/agenda</code></h6>
-                        <p>Retorna os agendamentos do dia ou período especificado.</p>
-                    </div>
-
-                    <div class="mb-3">
-                        <h6><span class="badge badge-success">POST</span> <code>/api/v1/medicos</code></h6>
-                        <p>Cadastra um novo médico via sistema externo.</p>
+                        <p>Retorna os agendamentos do sistema (Legado).</p>
                     </div>
                 </div>
 
