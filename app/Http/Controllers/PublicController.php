@@ -285,6 +285,9 @@ class PublicController extends Controller
                 $ocorrencias_rep->gravaOcorrencia($request->get('sala'), 'consulta', $data, $hora . ":00", null, $transacao);
             }
 
+            // Dispatch Webhook
+            \App\Helpers\WebhookHelper::dispatch('appointment.created', $params);
+
             $salas_rep = new SalasRepository();
             $sala = $salas_rep->getSala($request->get('sala'));
 
@@ -431,6 +434,9 @@ class PublicController extends Controller
             } catch (\Exception $e) {
                 \Log::error("Failed to send cancellation email: " . $e->getMessage());
             }
+
+            // Dispatch Webhook
+            \App\Helpers\WebhookHelper::dispatch('appointment.canceled', $params);
         });
 
         Session::flash('toastr', [
@@ -469,6 +475,15 @@ class PublicController extends Controller
                 );
                 return redirect()->route('cadastro_novo_medico');
             }
+
+            // Dispatch Webhook
+            \App\Helpers\WebhookHelper::dispatch('user.registered', [
+                'id' => $user_id,
+                'name' => $request->get('name'),
+                'email' => $request->get('email'),
+                'telefone' => $request->get('telefone')
+            ]);
+
             Session::flash(
                 'toastr',
                 [

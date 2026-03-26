@@ -51,6 +51,13 @@ Route::prefix('admin')->group(function () {
     Route::resource('usuario', 'UserController')->middleware('administrador');
     #Route::resource('agendamento', 'AgendamentoController')->middleware('administrador');
 
+    Route::get('api-config', 'Admin\ApiController@index')->name('admin.api.index')->middleware('administrador');
+    Route::post('api-config/token', 'Admin\ApiController@generateToken')->name('admin.token.generate')->middleware('administrador');
+    Route::delete('api-config/token/{id}', 'Admin\ApiController@revokeToken')->name('admin.token.revoke')->middleware('administrador');
+    Route::post('api-config/webhook', 'Admin\ApiController@storeWebhook')->name('admin.webhook.store')->middleware('administrador');
+    Route::delete('api-config/webhook/{id}', 'Admin\ApiController@deleteWebhook')->name('admin.webhook.delete')->middleware('administrador');
+    Route::post('api-config/webhook/{id}/test', 'Admin\ApiController@testWebhook')->name('admin.webhook.test')->middleware('administrador');
+
 
 });
 // Medico

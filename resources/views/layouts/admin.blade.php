@@ -106,6 +106,8 @@
                     </div>
                 </div>
 
+                <a href="{{ route('admin.api.index') }}" class="list-group-item list-group-item-action bg-light">Configurações API <i class="fa fa-code float-right mt-1"></i></a>
+
                 <div class="col text-center mt-3">
                     <a class="btn btn-default btn-block" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sair <i class="fa fa-sign-out"></i></a>
                 </div>
