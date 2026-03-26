@@ -32,6 +32,7 @@
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
+                                <small class="text-muted">A senha deve ter no mínimo 8 caracteres.</small>
 
                                 @error('password')
                                     <span class="invalid-feedback" role="alert">
