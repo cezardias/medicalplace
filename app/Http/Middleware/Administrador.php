@@ -19,7 +19,12 @@ class Administrador
         if (Auth::user() && in_array(Auth::user()->role,['administrador','secretaria']) && Auth::user()->status == 'ativo') {
             return $next($request);
         }
+        if (Auth::user()) {
+            if (Auth::user()->role == 'administrador' || Auth::user()->role == 'secretaria') {
+                return redirect()->guest(route('admin.index'));
+            }
+            return redirect()->guest(route('minha_conta'));
+        }
         return redirect()->route('login');
-        //return redirect('home')->with('error','You have not admin access');
     }
 }

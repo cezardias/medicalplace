@@ -49,6 +49,12 @@ class Medico
             }
         }
 
-        return redirect()->route('login');//->with('error','You have not admin access');
+        if (Auth::user()) {
+             if (Auth::user()->role == 'administrador' || Auth::user()->role == 'secretaria') {
+                return redirect()->guest(route('admin.index'));
+            }
+            return redirect()->guest(route('minha_conta'));
+        }
+        return redirect()->route('login');
     }
 }
