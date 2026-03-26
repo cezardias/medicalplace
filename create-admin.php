@@ -42,3 +42,24 @@ if (!$userM) {
     $userM->save();
     echo "Sucesso! Usuario medico criado (medico123).\n";
 }
+
+// Criar Usuario Cezar Dias para teste de recuperacao
+$emailC = 'cezar.dias@gmail.com';
+$userC = User::where('email', $emailC)->first();
+if (!$userC) {
+    $userC = new User();
+    $userC->name = 'cezar';
+    $userC->sobrenome = 'dias';
+    $userC->email = $emailC;
+    $userC->telefone = '61999449572';
+    $userC->cpf = '00589372181';
+    $userC->password = Hash::make('123456');
+    $userC->role = 'medico';
+    $userC->status = 'ativo';
+    $userC->save();
+    echo "Sucesso! Usuario cezar.dias@gmail.com criado (123456).\n";
+} else {
+    $userC->password = Hash::make('123456');
+    $userC->save();
+    echo "Usuario cezar.dias@gmail.com ja existia, senha resetada para 123456.\n";
+}
