@@ -121,10 +121,18 @@ class PublicController extends Controller
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
 
+        $horarios = $request->get('horario');
+        if (empty($horarios) && Session::has('agendamento')) {
+            $horarios = Session::get('agendamento')['horario'];
+        }
+
         $horario_selecionado = array();
-        foreach ($request->get('horario') as $hora => $val) {
-            if ($val == 1)
-                $horario_selecionado[] = $hora;
+        if (is_array($horarios)) {
+            foreach ($horarios as $hora => $val) {
+                if ($val == 1 || $val == "1") {
+                    $horario_selecionado[] = $hora;
+                }
+            }
         }
 
         $valor_total = $sala->valor_periodo * count($horario_selecionado);
