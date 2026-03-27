@@ -294,24 +294,22 @@ class PublicController extends Controller
                 $ocorrencias_rep->gravaOcorrencia($request->get('sala'), 'consulta', $data, $hora . ":00", null, $transacao);
             }
 
-            // Dispatch Webhook
-            \App\Helpers\WebhookHelper::dispatch('appointment.created', $params);
-
-            $salas_rep = new SalasRepository();
-            $sala = $salas_rep->getSala($request->get('sala'));
-
+            $fresh_user = \App\User::find(Auth::user()->id);
             $params = array();
-            $params['medico'] = Auth::user()->name . " " . Auth::user()->sobrenome;
+            $params['medico'] = $fresh_user->name . " " . $fresh_user->sobrenome;
             $params['sala'] = $sala->nome . '-' . $sala->numero;
             $params['horarios'] = $horarios;
             $params['data'] = $data->format('d/m/Y');
             $params['credito_selecionado'] = $credito_selecionado;
             $params['valor_total'] = $valor_total;
 
+            // Dispatch Webhook
+            \App\Helpers\WebhookHelper::dispatch('appointment.created', $params);
+
             $teste_log['EMAIL'] = $params;
             #return view('emails.confirmacao_agendamento', $params);
-            \App\Services\EmailEmergencyModule::enviarConfirmacao($params, Auth::user()->email);
-            Log::debug($teste_log);
+            \App\Services\EmailEmergencyModule::enviarConfirmacao($params, $fresh_user->email);
+            \Log::debug($teste_log);
             return response()->json([
                 'status' => true,
                 'message' => 'Reserva feita com sucesso'
