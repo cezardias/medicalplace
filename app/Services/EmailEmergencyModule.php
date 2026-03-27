@@ -16,12 +16,12 @@ class EmailEmergencyModule
         config([
             'mail.default' => 'smtp',
             'mail.mailers.smtp.host' => 'smtp.titan.email',
-            'mail.mailers.smtp.port' => 465,
-            'mail.mailers.smtp.encryption' => 'ssl',
+            'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.encryption' => 'tls',
             'mail.mailers.smtp.username' => 'naoresponder@medicalplace.med.br',
             'mail.mailers.smtp.password' => 'm3d1c4lpl4c3@',
             'mail.from.address' => 'naoresponder@medicalplace.med.br',
-            'mail.from.name' => 'Medical Place'
+            'mail.from.name' => 'Medical Place',
         ]);
     }
 
@@ -30,10 +30,9 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO (CLONE TEST) para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO para $email_destino");
             
-            // TESTE DEFINITIVO: Usando o template de cancelamento que sabemos que PASSA no filtro
-            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+            \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
                 $m->to($email_destino)->subject('Agendamento Medical Place');
             });
@@ -69,12 +68,11 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS (CLONE TEST) para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS para $email_destino");
             
-            // TESTE DEFINITIVO: Usando o template de cancelamento que sabemos que PASSA no filtro
-            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+            \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject('Agendamento Medical Place');
+                $m->to($email_destino)->subject('Acesso Medical Place');
             });
             
             return true;
