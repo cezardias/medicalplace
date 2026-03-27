@@ -25,15 +25,12 @@ class EmailEmergencyModule
         ]);
     }
 
-    /**
-     * Envia e-mail de confirmação (Síncrono)
-     */
     public static function enviarConfirmacao($params, $email_destino)
     {
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("DEBUG-MAIL: Enviando Confirmação para $email_destino");
+            Log::info("DEBUG-MAIL: Enviando CONFIRMACAO para $email_destino");
             
             Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from(config('mail.from.address'), config('app.name', 'Medical Place'));
