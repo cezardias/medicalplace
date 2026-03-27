@@ -415,20 +415,21 @@ class PublicController extends Controller
                 null
             );
 
-            // Send Cancellation Email
-            $medico = User::find($reserva->user_id);
-            $params = [
-                'nome' => $medico->name . " " . $medico->sobrenome,
-                'sala' => $reserva->nome,
-                'data' => Carbon::parse($reserva->data)->format('d/m/Y'),
-                'horarios' => [$reserva->hora]
-            ];
-
-            \App\Services\EmailEmergencyModule::enviarCancelamento($params, $medico->email);
-
-            // Dispatch Webhook
-            \App\Helpers\WebhookHelper::dispatch('appointment.canceled', $params);
         });
+
+        // Send Cancellation Email
+        $medico = User::find($reserva->user_id);
+        $params = [
+            'nome' => $medico->name . " " . $medico->sobrenome,
+            'sala' => $reserva->nome,
+            'data' => Carbon::parse($reserva->data)->format('d/m/Y'),
+            'horarios' => [$reserva->hora]
+        ];
+
+        \App\Services\EmailEmergencyModule::enviarCancelamento($params, $medico->email);
+
+        // Dispatch Webhook
+        \App\Helpers\WebhookHelper::dispatch('appointment.canceled', $params);
 
         Session::flash('toastr', [
             'status' => 'success',
