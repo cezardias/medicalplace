@@ -112,12 +112,6 @@ class PublicController extends Controller
                 'horario' => $request->get('horario')
             ));
         }
-
-
-
-        dump(Session::all());
-        dd($request);
-        die;
     }
 
 
