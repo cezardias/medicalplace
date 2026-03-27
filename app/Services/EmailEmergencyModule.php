@@ -18,9 +18,9 @@ class EmailEmergencyModule
             'mail.mailers.smtp.host' => 'smtp.titan.email',
             'mail.mailers.smtp.port' => 465,
             'mail.mailers.smtp.encryption' => 'ssl',
-            'mail.mailers.smtp.username' => 'naoresponda@medicalplace.med.br',
+            'mail.mailers.smtp.username' => 'naoresponder@medicalplace.med.br',
             'mail.mailers.smtp.password' => 'm3d1c4lpl4c3@',
-            'mail.from.address' => 'naoresponda@medicalplace.med.br',
+            'mail.from.address' => 'naoresponder@medicalplace.med.br',
             'mail.from.name' => 'Medical Place'
         ]);
     }
