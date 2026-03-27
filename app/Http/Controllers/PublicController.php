@@ -117,22 +117,29 @@ class PublicController extends Controller
 
 
 
-        dump(Session::all());
-        dd($request);
-        die;
     }
 
 
     public function checkoutAgendamento(Request $request)
     {
+        \Log::info("Checkout Agendamento Request: ", $request->all());
 
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
 
         $horario_selecionado = array();
-        foreach ($request->get('horario') as $hora => $val) {
-            if ($val == 1)
-                $horario_selecionado[] = $hora;
+        $horarios_raw = $request->get('horario');
+        
+        if (is_array($horarios_raw)) {
+            foreach ($horarios_raw as $hora => $val) {
+                if ($val == 1) {
+                    $horario_selecionado[] = $hora;
+                }
+            }
+        }
+
+        if (empty($horario_selecionado)) {
+            \Log::warning("Nenhum horário selecionado no request para a sala " . $request->get('sala'));
         }
 
         $valor_total = $sala->valor_periodo * count($horario_selecionado);
