@@ -32,7 +32,10 @@ class EmailEmergencyModule
             $email_destino = strtolower(trim($email_destino));
             Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO para $email_destino");
             
-            \Mail::to($email_destino)->send(new \App\Mail\ConfirmacaoAgendamento($params));
+            \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+                $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
+                $m->to($email_destino)->subject('Agendamento Confirmado - Medical Place');
+            });
             
             return true;
         } catch (\Exception $e) {
@@ -48,7 +51,10 @@ class EmailEmergencyModule
             $email_destino = strtolower(trim($email_destino));
             Log::info("EMERGENCY-MAIL: Enviando CANCELAMENTO para $email_destino");
             
-            \Mail::to($email_destino)->send(new \App\Mail\CancelamentoAgendamento($params));
+            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+                $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
+                $m->to($email_destino)->subject('Agendamento Cancelado - Medical Place');
+            });
             
             return true;
         } catch (\Exception $e) {
@@ -64,7 +70,10 @@ class EmailEmergencyModule
             $email_destino = strtolower(trim($email_destino));
             Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS para $email_destino");
             
-            \Mail::to($email_destino)->send(new \App\Mail\BoasVindasMedico($params));
+            \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
+                $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
+                $m->to($email_destino)->subject('Bem-vindo a Medical Place!');
+            });
             
             return true;
         } catch (\Exception $e) {
