@@ -30,9 +30,11 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO (RAW) para $email_destino");
             
-            \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+            $body = "Agendamento Confirmado!\n\nSala: " . ($params['sala'] ?? 'N/A') . "\nData: " . ($params['data'] ?? 'N/A') . "\nHorário: " . ($params['horario'] ?? 'N/A');
+            
+            \Mail::raw($body, function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
                 $m->to($email_destino)->subject('Agendamento Medical Place');
             });
@@ -68,9 +70,11 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS (RAW) para $email_destino");
             
-            \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
+            $body = "Bem-vindo a Medical Place!\n\nSeu cadastro foi realizado com sucesso.\nEmail: " . ($params['email'] ?? 'N/A');
+            
+            \Mail::raw($body, function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
                 $m->to($email_destino)->subject('Acesso Medical Place');
             });
