@@ -412,20 +412,17 @@ class PublicController extends Controller
                 null
             );
 
-            // Send Cancellation Email
+            // Send Cancellation Email - Síncrono
             $medico = User::find($reserva->user_id);
             $params = [
                 'medico' => $medico->name . " " . $medico->sobrenome,
+                'nome' => $medico->name . " " . $medico->sobrenome, // Compatibilidade
                 'sala' => $reserva->nome,
                 'data' => Carbon::parse($reserva->data)->format('d/m/Y'),
-                'horarios' => [$reserva->hora]
+                'horarios' => [Carbon::parse($reserva->hora)->format('H:i')]
             ];
 
-            try {
-                \Mail::to($medico->email)->queue(new \App\Mail\CancelamentoAgendamento($params));
-            } catch (\Exception $e) {
-                \Log::error("Failed to send cancellation email: " . $e->getMessage());
-            }
+            \App\Services\EmailEmergencyModule::enviarCancelamento($params, $medico->email);
         });
 
         Session::flash('toastr', [
@@ -471,6 +468,14 @@ class PublicController extends Controller
                     'message' => 'Gravado com sucesso!'
                 ]
             );
+
+            // Envio Síncrono de Boas-vindas
+            $params = [
+                'nome' => $request->get('name') . " " . $request->get('sobrenome'),
+                'email' => $request->get('email')
+            ];
+            \App\Services\EmailEmergencyModule::enviarBoasVindas($params, $request->get('email'));
+
             //return redirect()->route('usuario.index');
             return redirect()->route('login');
         }
