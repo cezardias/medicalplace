@@ -30,12 +30,11 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            $id = time();
-            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO [$id] para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO para $email_destino");
             
-            \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino, $id) {
+            \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject("Agendamento Medical Place #$id");
+                $m->to($email_destino)->subject('Agendamento Medical Place');
             });
             
             return true;
@@ -50,12 +49,11 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            $id = time();
-            Log::info("EMERGENCY-MAIL: Enviando CANCELAMENTO [$id] para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando CANCELAMENTO para $email_destino");
             
-            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino, $id) {
+            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject("Agendamento Medical Place #$id");
+                $m->to($email_destino)->subject('Agendamento Medical Place');
             });
             
             return true;
@@ -70,12 +68,11 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            $id = time();
-            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS [$id] para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS para $email_destino");
             
-            \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino, $id) {
+            \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject("Acesso Medical Place #$id");
+                $m->to($email_destino)->subject('Acesso Medical Place');
             });
             
             return true;
