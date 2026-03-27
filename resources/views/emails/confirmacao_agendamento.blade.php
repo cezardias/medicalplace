@@ -9,7 +9,7 @@
     <p><strong>Detalhes:</strong></p>
     <ul>
         <li>Data: {{ $params['data'] }}</li>
-        <li>Horários: {{ isset($params['horarios']) ? implode(', ', $params['horarios']) : 'N/A' }}</li>
+        <li>Horários: {{ isset($params['horarios']) ? (is_array($params['horarios']) ? implode(', ', $params['horarios']) : $params['horarios']) : 'N/A' }}</li>
     </ul>
     
     <p>Atenciosamente,<br>Equipe Medical Place</p>

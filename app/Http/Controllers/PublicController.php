@@ -232,9 +232,14 @@ class PublicController extends Controller
         $horarios = $request->get('horario');
         $horario_selecionado = [];
         if (is_array($horarios)) {
-            foreach ($horarios as $hora => $status) {
-                if ($status == "1" || $status == 1) {
-                    $horario_selecionado[] = $hora;
+            foreach ($horarios as $key => $val) {
+                // If it's asssociative '08:00' => '1'
+                if (($val == "1" || $val == 1) && preg_match('/^[0-9]{2}:[0-9]{2}$/', $key)) {
+                    $horario_selecionado[] = $key;
+                } 
+                // If it's numeric '08:00'
+                else if (preg_match('/^[0-9]{2}:[0-9]{2}$/', $val)) {
+                    $horario_selecionado[] = $val;
                 }
             }
         }
@@ -243,11 +248,11 @@ class PublicController extends Controller
         $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
         $horarios_ocupados = $ocorrencias_rep->getOcorrencias($data->format('Y-m-d 00:00:00'), $request->get('sala'));
 
-        foreach ($horarios as $hora) {
+        foreach ($horario_selecionado as $hora) {
             if (!in_array($hora, $horarios_disponiveis) || in_array($hora, $horarios_ocupados)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Horário selecionado inválido.'
+                    'message' => 'Horário selecionado inválido ou já ocupado.'
                 ]);
             }
         }
@@ -294,7 +299,7 @@ class PublicController extends Controller
                 $credito_rep->grava(Auth::user()->id, $credito_selecionado, 'debito');
             }
 
-            foreach ($horarios as $hora) {
+            foreach ($horario_selecionado as $hora) {
                 $ocorrencias_rep->gravaOcorrencia($request->get('sala'), 'consulta', $data, $hora . ":00", null, $transacao);
             }
 
