@@ -230,30 +230,17 @@ class PublicController extends Controller
         $ocorrencias_rep = new SalasOcorrenciasRepository();
         $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
         $horarios = $request->get('horario');
-        $horario_selecionado = [];
-        if (is_array($horarios)) {
-            foreach ($horarios as $key => $val) {
-                // If it's asssociative '08:00' => '1'
-                if (($val == "1" || $val == 1) && preg_match('/^[0-9]{2}:[0-9]{2}$/', $key)) {
-                    $horario_selecionado[] = $key;
-                } 
-                // If it's numeric '08:00'
-                else if (preg_match('/^[0-9]{2}:[0-9]{2}$/', $val)) {
-                    $horario_selecionado[] = $val;
-                }
-            }
-        }
-
         $ocorrencias_rep = new SalasOcorrenciasRepository();
         $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
         $horarios_ocupados = $ocorrencias_rep->getOcorrencias($data->format('Y-m-d 00:00:00'), $request->get('sala'));
 
-        foreach ($horario_selecionado as $hora) {
-            if (!in_array($hora, $horarios_disponiveis) || in_array($hora, $horarios_ocupados)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Horário selecionado inválido ou já ocupado.'
-                ]);
+        $horario_selecionado = [];
+        if (is_array($horarios)) {
+            foreach ($horarios as $k => $v) {
+                $h = (preg_match('/^[0-9]{2}:[0-9]{2}$/', $k)) ? $k : $v;
+                if (preg_match('/^[0-9]{2}:[0-9]{2}$/', $h)) {
+                    $horario_selecionado[] = $h;
+                }
             }
         }
 
