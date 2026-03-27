@@ -128,17 +128,22 @@ class PublicController extends Controller
 
         $horario_selecionado = array();
         if (is_array($horarios)) {
+            // Tentativa 1: Associativo ['08:00' => 1] - Qualquer coisa que não seja 0 ou 3
             foreach ($horarios as $hora => $val) {
-                if ($val == 1 || $val == "1") {
-                    $horario_selecionado[] = $hora;
+                $v = trim($val);
+                if ($v != "0" && $v != "3" && $v != "") {
+                    // Garante que a chave pareça um horário HH:mm
+                    if (preg_match('/^\d{2}:\d{2}$/', trim($hora))) {
+                        $horario_selecionado[] = trim($hora);
+                    }
                 }
             }
 
-            // Fallback se o array veio no formato de lista [0 => '08:00']
+            // Tentativa 2: Lista ['08:00', '09:00'] - Se a primeira falhou
             if (empty($horario_selecionado)) {
                 foreach ($horarios as $v) {
-                    if (is_string($v) && preg_match('/^\d{2}:\d{2}$/', $v)) {
-                        $horario_selecionado[] = $v;
+                    if (is_string($v) && preg_match('/^\d{2}:\d{2}$/', trim($v))) {
+                        $horario_selecionado[] = trim($v);
                     }
                 }
             }
