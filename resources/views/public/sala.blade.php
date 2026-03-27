@@ -189,8 +189,7 @@
                             @endphp
                             <input type="checkbox" name="horario[{{ $h }}]" 
                                    @if ($is_occupied || $is_past) disabled title="Indisponível" @endif 
-                                   value="1"> 
-                            <label for="" class="mx-3">Entrada: {{ $h }}</label>
+                                   value="1"> Entrada: {{ $h }}
                         </div>
                     @empty
                     @endforelse

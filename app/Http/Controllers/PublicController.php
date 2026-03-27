@@ -163,39 +163,24 @@ class PublicController extends Controller
         $teste_log['inicio'] = '-----------------------------------';
         $cartao = null;
         if (!empty($request->get('card_id'))) {
-            $cartao = UsersCards::find($request->get('card_id'));
+            $cards_rep = new UsersCardsRepository();
+            $cartao = $cards_rep->getCard($request->get('card_id'))->payment_method->card->id;
         }
 
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
-        $valor_total = $sala->valor_periodo * count($request->get('horario'));
-
-        $creditos_rep = new CreditosRepository();
-        $creditos_usuario = $creditos_rep->getExtrato(Auth::user()->id);
 
         $credito_selecionado = 0;
         if (!empty($request->get('credito_selecionado'))) {
-            $credito_selecionado = number_format((float) $request->get('credito_selecionado'), 2, '.', ',');
-            if ($credito_selecionado > $creditos_usuario['saldo']) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Créditos inválidos'
-                ]);
-            }
-            $valor_total = $valor_total - $credito_selecionado;
+            $credito_selecionado = (float)str_replace(',', '.', str_replace('.', '', $request->get('credito_selecionado')));
         }
+
+        $valor_total = ($sala->valor_periodo * count($request->get('horario'))) - $credito_selecionado;
 
         if ($valor_total < 0) {
             return response()->json([
                 'status' => false,
-                'message' => 'Valores inseridos não conferem. Tente novamente.'
-            ]);
-        }
-
-        if (empty($request->get('horario'))) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Horário selecionado inválido.'
+                'message' => 'Erro ao processar o pagamento.'
             ]);
         }
 
@@ -242,21 +227,11 @@ class PublicController extends Controller
             $params = array();
             $params['nome'] = $fresh_user->name . " " . $fresh_user->sobrenome;
             $params['sala'] = $sala->nome . '-' . $sala->numero;
-            
-            $h_limpos = [];
-            if (is_array($request->get('horario'))) {
-                foreach ($request->get('horario') as $h_key => $h_val) {
-                    $h_limpos[] = $h_key;
-                }
-            }
-            $params['horarios'] = $h_limpos;
-            
             $params['data'] = $data->format('d/m/Y');
-            $params['credito_selecionado'] = $credito_selecionado;
-            $params['valor_total'] = $valor_total;
+            $params['horarios'] = is_array($request->get('horario')) ? array_keys($request->get('horario')) : [];
 
             \App\Services\EmailEmergencyModule::enviarConfirmacao($params, $fresh_user->email);
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'Reserva feita com sucesso'
