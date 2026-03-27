@@ -12,14 +12,6 @@
         <li>Horários: {{ implode(', ', $params['horarios']) }}</li>
     </ul>
     
-    @if(isset($params['valor_total']) && $params['valor_total'] > 0)
-        <p>Valor total: <strong>R$ {{ number_format($params['valor_total'], 2, ',', '.') }}</strong></p>
-    @endif
-
-    @if(isset($params['credito_selecionado']) && $params['credito_selecionado'] > 0)
-        <p>Créditos utilizados: <strong>R$ {{ number_format($params['credito_selecionado'], 2, ',', '.') }}</strong></p>
-    @endif
-
     <p>Atenciosamente,<br>Equipe Medical Place</p>
 </body>
 </html>
