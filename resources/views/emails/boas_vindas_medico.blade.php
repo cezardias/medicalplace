@@ -5,11 +5,13 @@
 </head>
 <body>
     <h1>Olá, {{ $params['nome'] }}</h1>
-    <p>Seja bem-vindo à Medical Place! Seu cadastro foi realizado com sucesso.</p>
-    <p>Agora você pode acessar nosso sistema para realizar agendamentos e gerenciar suas consultas.</p>
-    <p><strong>Dados de acesso:</strong></p>
+    <p>Olá, <strong>{{ $params['nome'] ?? 'Doutor(a)' }}</strong></p>
+    <p>Seu cadastro na plataforma <strong>Medical Place</strong> foi confirmado com sucesso!</p>
+    
+    <p><strong>Seus dados de acesso:</strong></p>
     <ul>
-        <li>Login: {{ $params['email'] }}</li>
+        <li>Login: {{ $params['email'] ?? 'N/A' }}</li>
+        <li>Senha: (A que você escolheu no cadastro)</li>
     </ul>
     <p>Caso tenha alguma dúvida, nossa equipe está à disposição.</p>
     <p>Atenciosamente,<br>Equipe Medical Place</p>

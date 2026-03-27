@@ -4,12 +4,15 @@
     <title>Confirmação de Agendamento</title>
 </head>
 <body>
-    <h1>Olá, {{ $params['nome'] }}</h1>
-    <p>Seu agendamento para a sala <strong>{{ $params['sala'] }}</strong> foi realizado com sucesso.</p>
-    <p><strong>Detalhes:</strong></p>
+    <p>Olá, <strong>{{ $params['nome'] ?? 'Doutor(a)' }}</strong></p>
+    <p>Seu agendamento para a sala <strong>{{ $params['sala'] ?? 'N/A' }}</strong> foi realizado com sucesso.</p>
+    
+    <p><strong>Detalhes do Agendamento:</strong></p>
     <ul>
-        <li>Data: {{ $params['data'] }}</li>
-        <li>Horários: {{ isset($params['horarios']) ? (is_array($params['horarios']) ? implode(', ', $params['horarios']) : $params['horarios']) : 'N/A' }}</li>
+        <li>Data: {{ $params['data'] ?? 'N/A' }}</li>
+        <li>Horário: {{ $params['horario'] ?? 'N/A' }}</li>
+        <li>Valor: R$ {{ number_format($params['valor'] ?? 0, 2, ',', '.') }}</li>
+        <li>Pagamento: {{ $params['pagamento'] ?? 'Pendente' }}</li>
     </ul>
     
     <p>Atenciosamente,<br>Equipe Medical Place</p>
