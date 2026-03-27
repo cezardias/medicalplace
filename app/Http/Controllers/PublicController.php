@@ -122,8 +122,16 @@ class PublicController extends Controller
 
     public function checkoutAgendamento(Request $request)
     {
-        $salas_rep = new SalasRepository();
-        $sala = $salas_rep->getSala($request->get('sala'));
+        $raw = $request->get('horarios_selecionados');
+        $old = $request->get('horario');
+        
+        if (empty($raw) && empty($old)) {
+             dd([
+                 'ERRO' => 'NENHUM DADO DE HORÁRIO CHEGOU AO SERVIDOR',
+                 'request_all' => $request->all(),
+                 'session' => session()->all()
+             ]);
+        }
 
         $horario_selecionado = array();
         $raw = $request->get('horarios_selecionados');
@@ -344,7 +352,7 @@ class PublicController extends Controller
             $erro = false;
             if (!empty($request->get('senha'))) {
                 if ($request->get('senha') != $request->get('resenha')) {
-                    $erro = true;
+                   
                     Session::flash(
                         'toastr',
                         [
