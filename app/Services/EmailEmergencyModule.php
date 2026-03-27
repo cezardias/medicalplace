@@ -15,9 +15,7 @@ class EmailEmergencyModule
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            Log::info("DEBUG-MAIL: Iniciando Confirmação para $email_destino");
-            
-            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.confirmacao_agendamento', 'Agendamento Confirmado - Medical Place'));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.cancelamento_agendamento', 'Agendamento Cancelado - TESTE ESPELHAMENTO'));
             
             Log::info("DEBUG-MAIL: Resultado Confirmação: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
@@ -53,9 +51,7 @@ class EmailEmergencyModule
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            Log::info("DEBUG-MAIL: Iniciando Boas-vindas para $email_destino");
-            
-            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.boas_vindas_medico', 'Bem-vindo a Medical Place!'));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.cancelamento_agendamento', 'Agendamento Cancelado - TESTE ESPELHAMENTO'));
             
             Log::info("DEBUG-MAIL: Resultado Boas-vindas: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
