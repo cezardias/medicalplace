@@ -122,7 +122,7 @@ class PublicController extends Controller
 
     public function checkoutAgendamento(Request $request)
     {
-        \Log::info("Checkout Agendamento Request: ", $request->all());
+        dd($request->all());
 
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
