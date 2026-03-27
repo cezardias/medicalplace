@@ -3,7 +3,17 @@
 @section('javascript')
 <script>
     $(function () {
-        // Removido para usar funções inline mais robustas
+        $("#data").datepicker({
+            dateFormat: 'dd/mm/yy',
+            dayNames: ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],
+            dayNamesMin: ['D','S','T','Q','Q','S','S','D'],
+            dayNamesShort: ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+            monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+            monthNamesShort: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            nextText: 'Próximo',
+            prevText: 'Anterior',
+            minDate: "{{ $data_inicial->format('d/m/Y') }}"
+        });
         $("#data").on('change', function() {
             $('#data_selecionada').val($(this).val());
             $("#seleciona_data").submit();
