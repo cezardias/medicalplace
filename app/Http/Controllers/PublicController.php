@@ -207,46 +207,13 @@ class PublicController extends Controller
         }
 
 
-        $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
-        $horarios = $request->get('horario');
-        $horarios = $request->get('horario');
-        $horario_selecionado = [];
-        if (is_array($horarios)) {
-            foreach ($horarios as $k => $v) {
-                if ($v == "1" || $v == 1) {
-                    $horario_selecionado[] = $k;
-                } else {
-                    $horario_selecionado[] = $v;
-                }
-            }
-        }
-
         $ocorrencias_rep = new SalasOcorrenciasRepository();
-        $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
-        $horarios_ocupados = $ocorrencias_rep->getOcorrencias($data->format('Y-m-d 00:00:00'), $request->get('sala'));
+        $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
 
         $pagamento = [];
         if ($valor_total > 0) {
             $pagseguro = new Pagseguro();
             $pagamento = $pagseguro->charge($request, $valor_total, $cartao, Auth::user()->id);
-            /*$pagamento['status'] = true;
-
-            $dados = (object)[];
-            $dados->id = 1;
-            $dados->reference_id = 1;
-
-
-            $dados->amount = (object)[];
-            $dados->amount->value = 35;
-
-            $dados->payment_response = (object)[];
-            $dados->payment_response->code = 2000;
-
-            $dados->payment_method = (object)[];
-            $dados->payment_method->card = 123;
-
-            $pagamento['retorno'] = $dados;
-            $pagamento['mensagem'] = 'teste ok';*/
         } else {
             $pagamento['status'] = true;
         }
@@ -267,7 +234,7 @@ class PublicController extends Controller
                 $credito_rep->grava(Auth::user()->id, $credito_selecionado, 'debito');
             }
 
-            foreach ($horario_selecionado as $hora) {
+            foreach ($request->get('horario') as $hora => $val) {
                 $ocorrencias_rep->gravaOcorrencia($request->get('sala'), 'consulta', $data, $hora . ":00", null, $transacao);
             }
 
@@ -275,15 +242,21 @@ class PublicController extends Controller
             $params = array();
             $params['nome'] = $fresh_user->name . " " . $fresh_user->sobrenome;
             $params['sala'] = $sala->nome . '-' . $sala->numero;
-            $params['horarios'] = $horario_selecionado;
+            
+            $h_limpos = [];
+            if (is_array($request->get('horario'))) {
+                foreach ($request->get('horario') as $h_key => $h_val) {
+                    $h_limpos[] = $h_key;
+                }
+            }
+            $params['horarios'] = $h_limpos;
+            
             $params['data'] = $data->format('d/m/Y');
             $params['credito_selecionado'] = $credito_selecionado;
             $params['valor_total'] = $valor_total;
 
-            // Dispatch Webhook
-            \App\Helpers\WebhookHelper::dispatch('appointment.created', $params);
-
             \App\Services\EmailEmergencyModule::enviarConfirmacao($params, $fresh_user->email);
+            
             return response()->json([
                 'status' => true,
                 'message' => 'Reserva feita com sucesso'
