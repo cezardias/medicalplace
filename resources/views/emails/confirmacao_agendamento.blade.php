@@ -1,16 +1,25 @@
-Olá {{ $medico }},<br><br>
-Seu agendamento na sala <b>{{ $sala }}</b> no dia <b>{{ $data }}</b> está confirmado.<br><br>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirmação de Agendamento</title>
+</head>
+<body>
+    <h1>Olá, {{ $params['medico'] }}</h1>
+    <p>Seu agendamento para a sala <strong>{{ $params['sala'] }}</strong> foi realizado com sucesso.</p>
+    <p><strong>Detalhes:</strong></p>
+    <ul>
+        <li>Data: {{ $params['data'] }}</li>
+        <li>Horários: {{ implode(', ', $params['horarios']) }}</li>
+    </ul>
+    
+    @if(isset($params['valor_total']) && $params['valor_total'] > 0)
+        <p>Valor total: <strong>R$ {{ number_format($params['valor_total'], 2, ',', '.') }}</strong></p>
+    @endif
 
-@if ($valor_total > 0)
-Valor cobrado: <b>R$ {{ number_format($valor_total,2,',','.') }}</b><br>
-@endif
-@if ($credito_selecionado > 0)
-Créditos utilizados: <b>R$ {{ number_format($credito_selecionado,2,',','.') }}</b><br>
-@endif
-<br>
-Horário selecionado:<br>
-<ul>
-@foreach ($horarios as $h)
-    <li>Entrada às <b>{{ $h }}</b> e saída às <b>{{ \Carbon\Carbon::createFromFormat('H:i',$h)->addHour()->format('H:i') }}</b></li>
-@endforeach
-</ul>
+    @if(isset($params['credito_selecionado']) && $params['credito_selecionado'] > 0)
+        <p>Créditos utilizados: <strong>R$ {{ number_format($params['credito_selecionado'], 2, ',', '.') }}</strong></p>
+    @endif
+
+    <p>Atenciosamente,<br>Equipe Medical Place</p>
+</body>
+</html>
