@@ -3,39 +3,7 @@
 @section('javascript')
 <script>
     $(function () {
-        $("#data").datepicker({
-            dateFormat: 'dd/mm/yy',
-            dayNames: ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],
-            dayNamesMin: ['D','S','T','Q','Q','S','S','D'],
-            dayNamesShort: ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
-            monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
-            monthNamesShort: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
-            nextText: 'Próximo',
-            prevText: 'Anterior',
-            minDate: "{{ $data_inicial->format('d/m/Y') }}"
-        });
-        $(".select-horario").on('click',function() {
-            $(this).toggleClass('btn-default-outline btn-default is-selected');
-            console.log('Horário clicado:', $(this).data('time'), 'Selecionado:', $(this).hasClass('is-selected'));
-        });
-
-        $('#form_agendamento').on('submit', function(e) {
-            var selecionados = [];
-            $('.is-selected').each(function() {
-                selecionados.push($(this).data('time'));
-            });
-            
-            var val = selecionados.join(',');
-            $('#horarios_selecionados').val(val);
-            
-            console.log('Enviando horários:', val);
-
-            if (val == "" || val == null) {
-                alert("ERRO: Você não selecionou nenhum horário! Clique nos botões de horário (eles devem ficar com fundo azul/escuro) antes de clicar em agendar.");
-                e.preventDefault();
-                return false;
-            }
-        });
+        // Removido para usar funções inline mais robustas
         $("#data").on('change', function() {
             $('#data_selecionada').val($(this).val());
             $("#seleciona_data").submit();
@@ -213,10 +181,10 @@
                                 $is_past = $agora >= \Carbon\Carbon::createfromformat('Y-m-d H:i',$data->format('Y-m-d').' '.$h);
                             @endphp
                             <button type="button" 
-                                    data-id="{{ $k }}" 
                                     data-time="{{ $h }}"
-                                    class="btn @if($is_occupied || $is_past) btn-default-outline @else btn-default-outline btn-select-horario select-horario @endif mx-2 mb-2" 
-                                    @if ($is_occupied || $is_past) disabled title="Indisponível" @endif>
+                                    onclick="toggleHorario(this, '{{ $h }}')"
+                                    class="btn btn-default-outline btn-horario-seletor mx-2 mb-2" 
+                                    @if ($is_occupied || $is_past) disabled title="Indisponível" style="opacity:0.5;" @endif>
                                 {{ $h }}
                             </button>
                         @empty
@@ -224,6 +192,41 @@
                     </div>
                 </div>
                 </div>
+
+                <script>
+                    function toggleHorario(btn, time) {
+                        if (btn.classList.contains('btn-default-outline')) {
+                            btn.classList.remove('btn-default-outline');
+                            btn.classList.add('btn-default');
+                            btn.classList.add('active-selected');
+                        } else {
+                            btn.classList.add('btn-default-outline');
+                            btn.classList.remove('btn-default');
+                            btn.classList.remove('active-selected');
+                        }
+                        atualizarInputs();
+                    }
+
+                    function atualizarInputs() {
+                        var times = [];
+                        var selectedNodes = document.querySelectorAll('.active-selected');
+                        for (var i = 0; i < selectedNodes.length; i++) {
+                            times.push(selectedNodes[i].getAttribute('data-time'));
+                        }
+                        document.getElementById('horarios_selecionados').value = times.join(',');
+                        console.log('Selecionados:', document.getElementById('horarios_selecionados').value);
+                    }
+                    
+                    document.getElementById('form_agendamento').onsubmit = function(e) {
+                        atualizarInputs();
+                        var val = document.getElementById('horarios_selecionados').value;
+                        if (!val) {
+                            alert("ERRO CRÍTICO: Você precisa clicar nos horários azuis antes de agendar!");
+                            e.preventDefault();
+                            return false;
+                        }
+                    };
+                </script>
                 <div class="form-group">
                 <button type="submit" class="btn btn-default my-3">Solicitar agendamento</button>
                 </div>
