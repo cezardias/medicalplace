@@ -30,9 +30,10 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando CONFIRMACAO (CLONE TEST) para $email_destino");
             
-            \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+            // TESTE DEFINITIVO: Usando o template de cancelamento que sabemos que PASSA no filtro
+            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
                 $m->to($email_destino)->subject('Agendamento Medical Place');
             });
@@ -68,11 +69,12 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
-            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS para $email_destino");
+            Log::info("EMERGENCY-MAIL: Enviando BOAS-VINDAS (CLONE TEST) para $email_destino");
             
-            \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
+            // TESTE DEFINITIVO: Usando o template de cancelamento que sabemos que PASSA no filtro
+            \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject('Acesso Medical Place');
+                $m->to($email_destino)->subject('Agendamento Medical Place');
             });
             
             return true;
