@@ -149,18 +149,6 @@
         $('#validade').mask('00/00');
         $('#cvv').mask('000');
         $('#numero_cartao').mask('0000 0000 0000 0000');
-        
-        // Auto-fill credits if available
-        if ($('.entrada_creditos').length) {
-            let total = parseFloat($('.valor_total').val());
-            let disponivel = parseFloat($('.creditos_disponiveis').val());
-            let utilizar = Math.min(total, disponivel);
-            
-            if (utilizar > 0) {
-                $('.entrada_creditos').val(utilizar.toLocaleString('pt-br', {minimumFractionDigits: 2}));
-            }
-        }
-
         enableCardDataForPre();
         calcCharge();
     });
