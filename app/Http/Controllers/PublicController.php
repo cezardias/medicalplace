@@ -227,22 +227,22 @@ class PublicController extends Controller
         }
 
 
-        $ocorrencias_rep = new SalasOcorrenciasRepository();
         $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
         $horarios = $request->get('horario');
-        $ocorrencias_rep = new SalasOcorrenciasRepository();
-        $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
-        $horarios_ocupados = $ocorrencias_rep->getOcorrencias($data->format('Y-m-d 00:00:00'), $request->get('sala'));
-
         $horario_selecionado = [];
         if (is_array($horarios)) {
             foreach ($horarios as $k => $v) {
-                $h = (preg_match('/^[0-9]{2}:[0-9]{2}$/', $k)) ? $k : $v;
-                if (preg_match('/^[0-9]{2}:[0-9]{2}$/', $h)) {
-                    $horario_selecionado[] = $h;
+                if ($v == "1" || $v == 1) {
+                    $horario_selecionado[] = $k;
+                } else {
+                    $horario_selecionado[] = $v;
                 }
             }
         }
+
+        $ocorrencias_rep = new SalasOcorrenciasRepository();
+        $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
+        $horarios_ocupados = $ocorrencias_rep->getOcorrencias($data->format('Y-m-d 00:00:00'), $request->get('sala'));
 
         $pagamento = [];
         if ($valor_total > 0) {
