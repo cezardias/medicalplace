@@ -122,24 +122,18 @@ class PublicController extends Controller
 
     public function checkoutAgendamento(Request $request)
     {
-        dd($request->all());
-
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
 
         $horario_selecionado = array();
-        $horarios_raw = $request->get('horario');
+        $raw = $request->get('horarios_selecionados');
         
-        if (is_array($horarios_raw)) {
-            foreach ($horarios_raw as $hora => $val) {
-                if ($val == 1) {
-                    $horario_selecionado[] = $hora;
-                }
-            }
+        if (!empty($raw)) {
+            $horario_selecionado = explode(',', $raw);
         }
 
         if (empty($horario_selecionado)) {
-            \Log::warning("Nenhum horário selecionado no request para a sala " . $request->get('sala'));
+            \Log::warning("Nenhum horário selecionado no request unificado para a sala " . $request->get('sala'));
         }
 
         $valor_total = $sala->valor_periodo * count($horario_selecionado);

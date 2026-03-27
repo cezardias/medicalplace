@@ -14,22 +14,23 @@
             prevText: 'Anterior',
             minDate: "{{ $data_inicial->format('d/m/Y') }}"
         });
+        var selecionados = [];
         $(".select-horario").on('click',function() {
-            var id = $(this).attr('data-id');
-            var input = $('#h' + id);
+            var time = $(this).attr('data-time');
             var btn = $(this);
             
-            alert('Clique detectado no ID: ' + id + ' | Valor atual: ' + input.val());
-
-            if (input.val() == "0" || input.val() == 0) {
-                input.val(1);
+            if (btn.hasClass('btn-default-outline')) {
+                // Selecionar
                 btn.removeClass('btn-default-outline').addClass('btn-default');
-                alert('Alterado para 1 (Selecionado)');
-            } else if (input.val() == "1" || input.val() == 1) {
-                input.val(0);
+                selecionados.push(time);
+            } else {
+                // Desmarcar
                 btn.removeClass('btn-default').addClass('btn-default-outline');
-                alert('Alterado para 0 (Desmarcado)');
+                selecionados = selecionados.filter(function(t) { return t !== time; });
             }
+            
+            $('#horarios_selecionados').val(selecionados.join(','));
+            console.log('Horários selecionados:', $('#horarios_selecionados').val());
         });
         $("#data").on('change', function() {
             $('#data_selecionada').val($(this).val());
@@ -200,21 +201,21 @@
                 <div class="form-group">
                 <label for="">Selecione abaixo um dos horários disponíveis de entrada:</label>
                 <div class="sala-agenda seletor-horario">
+                    <input type="hidden" name="horarios_selecionados" id="horarios_selecionados" value="">
                     <div class="mb-3">
                         @forelse ($horarios as $k => $h)
-                            @if ($agora < \Carbon\Carbon::createfromformat('Y-m-d H:i',$data->format('Y-m-d').' '.$h))
-                                <input type="hidden" id="h{{ $k }}" name="horario[{{ $h }}]" @if (in_array($h,$ocorrencias)) value="3" @else value="0" @endif>
-                                <button type="button" data-id="{{ $k }}" class="btn btn-default-outline mx-2 mb-2 btn-select-horario select-horario" @if (in_array($h,$ocorrencias)) disabled title="Indisponível" @endif>
-                                    {{ $h }}
-                                </button>
-                            @else
-                                <input type="hidden" id="h{{ $k }}" name="horario[{{ $h }}]" value="3">
-                                <button type="button" data-id="{{ $k }}" class="btn btn-default-outline mx-2 mb-2 btn-select-horario select-horario" disabled title="Indisponível">
-                                    {{ $h }}
-                                </button>
-                            @endif
+                            @php 
+                                $is_occupied = in_array($h, $ocorrencias);
+                                $is_past = $agora >= \Carbon\Carbon::createfromformat('Y-m-d H:i',$data->format('Y-m-d').' '.$h);
+                            @endphp
+                            <button type="button" 
+                                    data-id="{{ $k }}" 
+                                    data-time="{{ $h }}"
+                                    class="btn @if($is_occupied || $is_past) btn-default-outline @else btn-default-outline btn-select-horario select-horario @endif mx-2 mb-2" 
+                                    @if ($is_occupied || $is_past) disabled title="Indisponível" @endif>
+                                {{ $h }}
+                            </button>
                         @empty
-
                         @endforelse
                     </div>
                 </div>
