@@ -180,63 +180,22 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                <label for="">Selecione abaixo um dos horários disponíveis de entrada:</label>
-                <div class="sala-agenda seletor-horario">
-                    <input type="hidden" name="horarios_selecionados" id="horarios_selecionados" value="">
-                    <div class="mb-3">
-                        @forelse ($horarios as $k => $h)
+                <div class="sala-agenda">
+                    @forelse ($horarios as $k => $h)
+                        <div class="mb-3">
                             @php 
                                 $is_occupied = in_array($h, $ocorrencias);
                                 $is_past = $agora >= \Carbon\Carbon::createfromformat('Y-m-d H:i',$data->format('Y-m-d').' '.$h);
                             @endphp
-                            <button type="button" 
-                                    data-time="{{ $h }}"
-                                    onclick="toggleHorario(this, '{{ $h }}')"
-                                    class="btn btn-default-outline btn-horario-seletor mx-2 mb-2" 
-                                    @if ($is_occupied || $is_past) disabled title="Indisponível" style="opacity:0.5;" @endif>
-                                {{ $h }}
-                            </button>
-                        @empty
-                        @endforelse
-                    </div>
+                            <input type="checkbox" name="horario[{{ $h }}]" 
+                                   @if ($is_occupied || $is_past) disabled title="Indisponível" @endif 
+                                   value="1"> 
+                            <label for="" class="mx-3">Entrada: {{ $h }}</label>
+                        </div>
+                    @empty
+                    @endforelse
                 </div>
                 </div>
-
-                <script>
-                    function toggleHorario(btn, time) {
-                        if (btn.classList.contains('btn-default-outline')) {
-                            btn.classList.remove('btn-default-outline');
-                            btn.classList.add('btn-default');
-                            btn.classList.add('active-selected');
-                        } else {
-                            btn.classList.add('btn-default-outline');
-                            btn.classList.remove('btn-default');
-                            btn.classList.remove('active-selected');
-                        }
-                        atualizarInputs();
-                    }
-
-                    function atualizarInputs() {
-                        var times = [];
-                        var selectedNodes = document.querySelectorAll('.active-selected');
-                        for (var i = 0; i < selectedNodes.length; i++) {
-                            times.push(selectedNodes[i].getAttribute('data-time'));
-                        }
-                        document.getElementById('horarios_selecionados').value = times.join(',');
-                        console.log('Selecionados:', document.getElementById('horarios_selecionados').value);
-                    }
-                    
-                    document.getElementById('form_agendamento').onsubmit = function(e) {
-                        atualizarInputs();
-                        var val = document.getElementById('horarios_selecionados').value;
-                        if (!val) {
-                            alert("ERRO CRÍTICO: Você precisa clicar nos horários azuis antes de agendar!");
-                            e.preventDefault();
-                            return false;
-                        }
-                    };
-                </script>
                 <div class="form-group">
                 <button type="submit" class="btn btn-default my-3">Solicitar agendamento</button>
                 </div>

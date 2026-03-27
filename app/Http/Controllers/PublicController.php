@@ -120,39 +120,19 @@ class PublicController extends Controller
     }
 
 
-    public function checkoutAgendamento(Request $request)
-    {
-        $raw = $request->get('horarios_selecionados');
-        $old = $request->get('horario');
-        
-        $horario_selecionado = array();
-        
-        if (!empty($raw)) {
-            $horario_selecionado = explode(',', $raw);
-        } elseif (is_array($old)) {
-            foreach($old as $h => $v) {
-                if ($v == 1 || $v == "1") {
-                    $horario_selecionado[] = $h;
-                }
-            }
-        }
-
+    public function checkoutAgendamento(Request $request) {
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
 
-        if (empty($horario_selecionado)) {
-            \Log::warning("Agendamento sem horários: ", $request->all());
-        }
-
-        $valor_total = $sala->valor_periodo * count($horario_selecionado);
+        $valor_total = $sala->valor_periodo * count($request->get('horario'));
 
         $cards_rep = new UsersCardsRepository();
         $creditos_rep = new CreditosRepository();
 
-        return view('public.checkout', [
+        return view('public.checkout',[
             'sala' => $sala,
             'data_agendamento' => $request->get('data_agendamento'),
-            'horario_selecionado' => $horario_selecionado,
+            'horario_selecionado' => $request->get('horario'),
             'valor_total' => $valor_total,
             'cartoes_cadastrados' => $cards_rep->getMeusCartoes(Auth::user()->id),
             'creditos' => $creditos_rep->getExtrato(Auth::user()->id)
@@ -228,6 +208,7 @@ class PublicController extends Controller
 
 
         $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
+        $horarios = $request->get('horario');
         $horarios = $request->get('horario');
         $horario_selecionado = [];
         if (is_array($horarios)) {
