@@ -9,54 +9,58 @@ use App\Mail\DirectMail;
 class EmailEmergencyModule
 {
     /**
-     * Envia e-mail de confirmação (Síncrono via DirectMail)
+     * Envia e-mail de confirmação (Síncrono)
      */
     public static function enviarConfirmacao($params, $email_destino)
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.cancelamento_agendamento', 'Agendamento Cancelado - TESTE ESPELHAMENTO'));
+            Log::info("DEBUG-MAIL: Enviando Confirmação para $email_destino");
             
-            Log::info("DEBUG-MAIL: Resultado Confirmação: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.confirmacao_agendamento', 'Agendamento Confirmado - Medical Place'));
+            
+            Log::info("DEBUG-MAIL: Resultado Confirmação: " . ($sent ? "ENVIADO" : "FALHA"));
             return true;
         } catch (\Exception $e) {
-            Log::error("DEBUG-MAIL: EXCECAO Confirmação para $email_destino: " . $e->getMessage());
+            Log::error("DEBUG-MAIL: ERRO Confirmação: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Envia e-mail de cancelamento (Síncrono via DirectMail)
+     * Envia e-mail de cancelamento (Síncrono)
      */
     public static function enviarCancelamento($params, $email_destino)
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            Log::info("DEBUG-MAIL: Iniciando Cancelamento para $email_destino");
+            Log::info("DEBUG-MAIL: Enviando Cancelamento para $email_destino");
             
             $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.cancelamento_agendamento', 'Agendamento Cancelado - Medical Place'));
             
-            Log::info("DEBUG-MAIL: Resultado Cancelamento: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
+            Log::info("DEBUG-MAIL: Resultado Cancelamento: " . ($sent ? "ENVIADO" : "FALHA"));
             return true;
         } catch (\Exception $e) {
-            Log::error("DEBUG-MAIL: EXCECAO Cancelamento para $email_destino: " . $e->getMessage());
+            Log::error("DEBUG-MAIL: ERRO Cancelamento: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Envia e-mail de boas-vindas (Síncrono via DirectMail)
+     * Envia e-mail de boas-vindas (Síncrono)
      */
     public static function enviarBoasVindas($params, $email_destino)
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.cancelamento_agendamento', 'Agendamento Cancelado - TESTE ESPELHAMENTO'));
+            Log::info("DEBUG-MAIL: Enviando Boas-vindas para $email_destino");
             
-            Log::info("DEBUG-MAIL: Resultado Boas-vindas: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.boas_vindas_medico', 'Bem-vindo a Medical Place!'));
+            
+            Log::info("DEBUG-MAIL: Resultado Boas-vindas: " . ($sent ? "ENVIADO" : "FALHA"));
             return true;
         } catch (\Exception $e) {
-            Log::error("DEBUG-MAIL: EXCECAO Boas-vindas para $email_destino: " . $e->getMessage());
+            Log::error("DEBUG-MAIL: ERRO Boas-vindas: " . $e->getMessage());
             return false;
         }
     }

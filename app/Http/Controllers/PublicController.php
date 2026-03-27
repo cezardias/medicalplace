@@ -304,7 +304,7 @@ class PublicController extends Controller
 
             $fresh_user = \App\User::find(Auth::user()->id);
             $params = array();
-            $params['medico'] = $fresh_user->name . " " . $fresh_user->sobrenome;
+            $params['nome'] = $fresh_user->name . " " . $fresh_user->sobrenome;
             $params['sala'] = $sala->nome . '-' . $sala->numero;
             $params['horarios'] = $horario_selecionado;
             $params['data'] = $data->format('d/m/Y');
@@ -434,7 +434,7 @@ class PublicController extends Controller
             // Send Cancellation Email
             $medico = User::find($reserva->user_id);
             $params = [
-                'medico' => $medico->name . " " . $medico->sobrenome,
+                'nome' => $medico->name . " " . $medico->sobrenome,
                 'sala' => $reserva->nome,
                 'data' => Carbon::parse($reserva->data)->format('d/m/Y'),
                 'horarios' => [$reserva->hora]
