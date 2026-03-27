@@ -17,13 +17,14 @@ class EmailEmergencyModule
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            Log::info("Acionando Módulo de Emergência: Confirmação para $email_destino");
+            Log::info("DEBUG-MAIL: Iniciando Confirmação para $email_destino");
             
-            Mail::to($email_destino)->send(new ConfirmacaoAgendamento($params));
+            $sent = Mail::to($email_destino)->send(new ConfirmacaoAgendamento($params));
             
+            Log::info("DEBUG-MAIL: Resultado Confirmação: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
         } catch (\Exception $e) {
-            Log::error("Erro no Módulo de Emergência (Confirmacao) para $email_destino: " . $e->getMessage());
+            Log::error("DEBUG-MAIL: EXCECAO Confirmação para $email_destino: " . $e->getMessage());
             return false;
         }
     }
@@ -35,13 +36,14 @@ class EmailEmergencyModule
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            Log::info("Acionando Módulo de Emergência: Cancelamento para $email_destino");
+            Log::info("DEBUG-MAIL: Iniciando Cancelamento para $email_destino");
             
-            Mail::to($email_destino)->send(new CancelamentoAgendamento($params));
+            $sent = Mail::to($email_destino)->send(new CancelamentoAgendamento($params));
             
+            Log::info("DEBUG-MAIL: Resultado Cancelamento: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
         } catch (\Exception $e) {
-            Log::error("Erro no Módulo de Emergência (Cancelamento) para $email_destino: " . $e->getMessage());
+            Log::error("DEBUG-MAIL: EXCECAO Cancelamento para $email_destino: " . $e->getMessage());
             return false;
         }
     }
@@ -53,13 +55,14 @@ class EmailEmergencyModule
     {
         try {
             $email_destino = strtolower(trim($email_destino));
-            Log::info("Acionando Módulo de Emergência: Boas-vindas para $email_destino");
+            Log::info("DEBUG-MAIL: Iniciando Boas-vindas para $email_destino");
             
-            Mail::to($email_destino)->send(new BoasVindasMedico($params));
+            $sent = Mail::to($email_destino)->send(new BoasVindasMedico($params));
             
+            Log::info("DEBUG-MAIL: Resultado Boas-vindas: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
         } catch (\Exception $e) {
-            Log::error("Erro no Módulo de Emergência (Boas-vindas) para $email_destino: " . $e->getMessage());
+            Log::error("DEBUG-MAIL: EXCECAO Boas-vindas para $email_destino: " . $e->getMessage());
             return false;
         }
     }
@@ -72,7 +75,7 @@ class EmailEmergencyModule
         try {
             $email_destino = strtolower(trim($email_destino));
             Mail::raw('Módulo de Emergência Medical Place - Teste Síncrono', function ($m) use ($email_destino) {
-                $m->to($email_destino)->subject('Teste de Módulo Isolado');
+                $m->to($email_destino)->subject('Teste de Modulo Isolado');
             });
             return "OK: Email direto enviado com sucesso para $email_destino";
         } catch (\Exception $e) {

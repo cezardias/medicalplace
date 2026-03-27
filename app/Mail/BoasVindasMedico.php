@@ -31,7 +31,7 @@ class BoasVindasMedico extends Mailable
     public function build()
     {
         return $this->from(config('mail.from.address'), config('mail.from.name'))
-                    ->subject('Bem-vindo à Medical Place!')
+                    ->subject('Bem-vindo a Medical Place!')
                     ->view('emails.boas_vindas_medico');
     }
 }
