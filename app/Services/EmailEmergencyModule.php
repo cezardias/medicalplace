@@ -8,11 +8,29 @@ use Illuminate\Support\Facades\Mail;
 class EmailEmergencyModule
 {
     /**
+     * Configura o SMTP em tempo de execução para bypass de cache (Hostinger)
+     */
+    private static function setSMTP()
+    {
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => 'smtp.hostinger.com',
+            'mail.mailers.smtp.port' => 465,
+            'mail.mailers.smtp.encryption' => 'ssl',
+            'mail.mailers.smtp.username' => 'atendimento@medicalplace.med.br',
+            'mail.mailers.smtp.password' => 'Marcelo@medical10#',
+            'mail.from.address' => 'atendimento@medicalplace.med.br',
+            'mail.from.name' => 'Medical Place'
+        ]);
+    }
+
+    /**
      * Envia e-mail de confirmação (Síncrono)
      */
     public static function enviarConfirmacao($params, $email_destino)
     {
         try {
+            self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
             Log::info("DEBUG-MAIL: Enviando Confirmação para $email_destino");
             
@@ -35,6 +53,7 @@ class EmailEmergencyModule
     public static function enviarCancelamento($params, $email_destino)
     {
         try {
+            self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
             Log::info("DEBUG-MAIL: Enviando Cancelamento para $email_destino");
             
@@ -57,6 +76,7 @@ class EmailEmergencyModule
     public static function enviarBoasVindas($params, $email_destino)
     {
         try {
+            self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
             Log::info("DEBUG-MAIL: Enviando Boas-vindas para $email_destino");
             
