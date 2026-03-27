@@ -310,11 +310,7 @@ class PublicController extends Controller
 
             $teste_log['EMAIL'] = $params;
             #return view('emails.confirmacao_agendamento', $params);
-            try {
-                \Mail::to(Auth::user()->email)->queue(new \App\Mail\ConfirmacaoAgendamento($params));
-            } catch (\Exception $e) {
-                \Log::error("Failed to send confirmation email: " . $e->getMessage());
-            }
+            \App\Services\EmailEmergencyModule::enviarConfirmacao($params, Auth::user()->email);
             Log::debug($teste_log);
             return response()->json([
                 'status' => true,
@@ -438,11 +434,7 @@ class PublicController extends Controller
                 'horarios' => [$reserva->hora]
             ];
 
-            try {
-                \Mail::to($medico->email)->queue(new \App\Mail\CancelamentoAgendamento($params));
-            } catch (\Exception $e) {
-                \Log::error("Failed to send cancellation email: " . $e->getMessage());
-            }
+            \App\Services\EmailEmergencyModule::enviarCancelamento($params, $medico->email);
 
             // Dispatch Webhook
             \App\Helpers\WebhookHelper::dispatch('appointment.canceled', $params);
@@ -486,14 +478,10 @@ class PublicController extends Controller
             }
 
             // Send Welcome Email
-            try {
-                \Mail::to($request->get('email'))->queue(new \App\Mail\BoasVindasMedico([
-                    'nome' => $request->get('name'),
-                    'email' => $request->get('email')
-                ]));
-            } catch (\Exception $e) {
-                \Log::error("Failed to send welcome email: " . $e->getMessage());
-            }
+            \App\Services\EmailEmergencyModule::enviarBoasVindas([
+                'nome' => $request->get('name'),
+                'email' => $request->get('email')
+            ], $request->get('email'));
 
             // Dispatch Webhook
             \App\Helpers\WebhookHelper::dispatch('user.registered', [
