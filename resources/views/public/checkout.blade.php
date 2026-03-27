@@ -386,10 +386,10 @@
                     <div class="form-group">
                         <p class="revisar-label">Horário(s) selecionados para o dia {{ $data_agendamento }}</p>
                         <input type="hidden" name="data_agendamento" value="{{ $data_agendamento }}">
-                        @forelse ($horario_selecionado as $key => $hora)
-                        <div id="horario_{{ $key }}">
-                            <input type="hidden" name="horario[]" value="{{ $hora }}">
-                            <h5><button class='btn btn-sm btn-outline-danger remove_horario' data-id="horario_{{ $key }}"><i class="fa fa-times" aria-hidden="true"></i></button>&nbsp;<strong>{{ $hora }} até {{ \Carbon\Carbon::createFromFormat('H:i',$hora)->addHour()->format('H:i') }} h</strong></h5>
+                        @forelse ($horario_selecionado as $hora => $val)
+                        <div id="horario_{{ str_replace(':','',$hora) }}">
+                            <input type="hidden" name="horario[{{ $hora }}]" value="1">
+                            <h5><button class='btn btn-sm btn-outline-danger remove_horario' data-id="horario_{{ str_replace(':','',$hora) }}"><i class="fa fa-times" aria-hidden="true"></i></button>&nbsp;<strong>{{ $hora }} até {{ \Carbon\Carbon::createFromFormat('H:i',$hora)->addHour()->format('H:i') }} h</strong></h5>
                         </div>
                         @empty
                         @endforelse

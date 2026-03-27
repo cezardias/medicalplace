@@ -17,6 +17,7 @@ class EmailEmergencyModule
             Log::info("DEBUG-MAIL: Enviando Confirmação para $email_destino");
             
             $sent = Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+                $m->from(env('MAIL_USERNAME'), env('APP_NAME', 'Medical Place'));
                 $m->to($email_destino)->subject('Agendamento Confirmado - Medical Place');
             });
             
@@ -38,6 +39,7 @@ class EmailEmergencyModule
             Log::info("DEBUG-MAIL: Enviando Cancelamento para $email_destino");
             
             $sent = Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
+                $m->from(env('MAIL_USERNAME'), env('APP_NAME', 'Medical Place'));
                 $m->to($email_destino)->subject('Agendamento Cancelado - Medical Place');
             });
             
@@ -59,6 +61,7 @@ class EmailEmergencyModule
             Log::info("DEBUG-MAIL: Enviando Boas-vindas para $email_destino");
             
             $sent = Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
+                $m->from(env('MAIL_USERNAME'), env('APP_NAME', 'Medical Place'));
                 $m->to($email_destino)->subject('Bem-vindo a Medical Place!');
             });
             
