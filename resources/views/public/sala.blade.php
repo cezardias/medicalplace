@@ -15,26 +15,31 @@
             minDate: "{{ $data_inicial->format('d/m/Y') }}"
         });
         $(".select-horario").on('click',function() {
-
-            let horario = $(this).data('id');
+            let horario = parseInt($(this).data('id'));
             let next_horario = horario + 1;
 
             let sel = $('#h'+horario).val();
             let next_sel = $('#h'+next_horario).val();
+            
+            console.log('Selecionando horário ID:', horario, 'Status atual:', sel, 'Próximo status:', next_sel);
 
             if (sel == 0 && next_sel == 0) {
                 $('#h'+horario).val(1);
-                $('button[data-id="'+next_horario+'"]').prop('disabled',true);
-                $('button[data-id="'+next_horario+'"]').switchClass('btn-default-outline','btn-default');
-            } else if (sel == 0 && next_sel == 1 || next_sel === undefined || next_sel == 3) {
-                $('button[data-id="'+horario+'"]').switchClass('btn-default','btn-default-outline');
-                toastr["info"]("Horário indisponível. Reserva precisa ser maior que 1 hora.");
+                $(this).removeClass('btn-default-outline').addClass('btn-default');
+                console.log('Horário ' + horario + ' marcado como SELECIONADO');
+            } else if (sel == 0 && (next_sel == 1 || next_sel === undefined || next_sel == 3)) {
+                // Se já estiver selecionado o próximo ou estiver indisponível
+                if (next_sel == 1) {
+                   $('#h'+horario).val(1);
+                   $(this).removeClass('btn-default-outline').addClass('btn-default');
+                } else {
+                   toastr["info"]("Horário indisponível ou reserva precisa ser de no mínimo 1 hora.");
+                }
             } else {
                 $('#h'+horario).val(0);
-                $('button[data-id="'+next_horario+'"]').prop('disabled',false);
-                $('button[data-id="'+next_horario+'"]').switchClass('btn-default','btn-default-outline');
+                $(this).removeClass('btn-default').addClass('btn-default-outline');
+                console.log('Horário ' + horario + ' DESMARCADO');
             }
-
         });
         $("#data").on('change', function() {
             $('#data_selecionada').val($(this).val());
