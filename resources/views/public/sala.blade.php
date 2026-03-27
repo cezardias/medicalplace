@@ -14,23 +14,27 @@
             prevText: 'Anterior',
             minDate: "{{ $data_inicial->format('d/m/Y') }}"
         });
-        var selecionados = [];
         $(".select-horario").on('click',function() {
-            var time = $(this).attr('data-time');
-            var btn = $(this);
+            $(this).toggleClass('btn-default-outline btn-default is-selected');
+            console.log('Horário clicado:', $(this).data('time'), 'Selecionado:', $(this).hasClass('is-selected'));
+        });
+
+        $('#form_agendamento').on('submit', function(e) {
+            var selecionados = [];
+            $('.is-selected').each(function() {
+                selecionados.push($(this).data('time'));
+            });
             
-            if (btn.hasClass('btn-default-outline')) {
-                // Selecionar
-                btn.removeClass('btn-default-outline').addClass('btn-default');
-                selecionados.push(time);
-            } else {
-                // Desmarcar
-                btn.removeClass('btn-default').addClass('btn-default-outline');
-                selecionados = selecionados.filter(function(t) { return t !== time; });
+            var val = selecionados.join(',');
+            $('#horarios_selecionados').val(val);
+            
+            console.log('Enviando horários:', val);
+
+            if (val == "" || val == null) {
+                alert("ERRO: Você não selecionou nenhum horário! Clique nos botões de horário (eles devem ficar com fundo azul/escuro) antes de clicar em agendar.");
+                e.preventDefault();
+                return false;
             }
-            
-            $('#horarios_selecionados').val(selecionados.join(','));
-            console.log('Horários selecionados:', $('#horarios_selecionados').val());
         });
         $("#data").on('change', function() {
             $('#data_selecionada').val($(this).val());

@@ -125,23 +125,23 @@ class PublicController extends Controller
         $raw = $request->get('horarios_selecionados');
         $old = $request->get('horario');
         
-        if (empty($raw) && empty($old)) {
-             dd([
-                 'ERRO' => 'NENHUM DADO DE HORÁRIO CHEGOU AO SERVIDOR',
-                 'request_all' => $request->all(),
-                 'session' => session()->all()
-             ]);
-        }
-
         $horario_selecionado = array();
-        $raw = $request->get('horarios_selecionados');
         
         if (!empty($raw)) {
             $horario_selecionado = explode(',', $raw);
+        } elseif (is_array($old)) {
+            foreach($old as $h => $v) {
+                if ($v == 1 || $v == "1") {
+                    $horario_selecionado[] = $h;
+                }
+            }
         }
 
+        $salas_rep = new SalasRepository();
+        $sala = $salas_rep->getSala($request->get('sala'));
+
         if (empty($horario_selecionado)) {
-            \Log::warning("Nenhum horário selecionado no request unificado para a sala " . $request->get('sala'));
+            \Log::warning("Agendamento sem horários: ", $request->all());
         }
 
         $valor_total = $sala->valor_periodo * count($horario_selecionado);
