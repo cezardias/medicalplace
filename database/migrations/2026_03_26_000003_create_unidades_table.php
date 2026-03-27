@@ -13,14 +13,16 @@ class CreateUnidadesTable extends Migration
      */
     public function up()
     {
-        Schema::create('unidades', function (Blueprint $col) {
-            $col->id();
-            $col->string('nome');
-            $col->string('endereco');
-            $col->text('horario_funcionamento')->nullable();
-            $col->string('status')->default('ativa');
-            $col->timestamps();
-        });
+        if (!Schema::hasTable('unidades')) {
+            Schema::create('unidades', function (Blueprint $col) {
+                $col->id();
+                $col->string('nome');
+                $col->string('endereco');
+                $col->text('horario_funcionamento')->nullable();
+                $col->string('status')->default('ativa');
+                $col->timestamps();
+            });
+        }
     }
 
     /**

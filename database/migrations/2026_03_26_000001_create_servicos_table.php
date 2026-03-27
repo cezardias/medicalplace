@@ -13,16 +13,18 @@ class CreateServicosTable extends Migration
      */
     public function up()
     {
-        Schema::create('servicos', function (Blueprint $col) {
-            $col->id();
-            $col->unsignedBigInteger('especialidade_id');
-            $col->string('nome');
-            $col->decimal('preco', 10, 2);
-            $col->string('status')->default('ativa');
-            $col->timestamps();
+        if (!Schema::hasTable('servicos')) {
+            Schema::create('servicos', function (Blueprint $col) {
+                $col->id();
+                $col->unsignedBigInteger('especialidade_id');
+                $col->string('nome');
+                $col->decimal('preco', 10, 2);
+                $col->string('status')->default('ativa');
+                $col->timestamps();
 
-            $col->foreign('especialidade_id')->references('id')->on('especialidades')->onDelete('cascade');
-        });
+                $col->foreign('especialidade_id')->references('id')->on('especialidades')->onDelete('cascade');
+            });
+        }
     }
 
     /**

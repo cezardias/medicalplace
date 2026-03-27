@@ -13,20 +13,22 @@ class CreateLeadsTable extends Migration
      */
     public function up()
     {
-        Schema::create('leads', function (Blueprint $col) {
-            $col->id();
-            $col->string('tipo'); // paciente ou medico
-            $col->string('nome');
-            $col->string('telefone');
-            $col->string('email')->nullable();
-            $col->string('cpf')->nullable();
-            $col->string('crm')->nullable();
-            $col->string('especialidade')->nullable();
-            $col->string('turno')->nullable();
-            $col->string('convenio')->nullable();
-            $col->string('status')->default('novo');
-            $col->timestamps();
-        });
+        if (!Schema::hasTable('leads')) {
+            Schema::create('leads', function (Blueprint $col) {
+                $col->id();
+                $col->string('tipo'); // paciente ou medico
+                $col->string('nome');
+                $col->string('telefone');
+                $col->string('email')->nullable();
+                $col->string('cpf')->nullable();
+                $col->string('crm')->nullable();
+                $col->string('especialidade')->nullable();
+                $col->string('turno')->nullable();
+                $col->string('convenio')->nullable();
+                $col->string('status')->default('novo');
+                $col->timestamps();
+            });
+        }
     }
 
     /**

@@ -13,12 +13,14 @@ class CreateEspecialidadesTable extends Migration
      */
     public function up()
     {
-        Schema::create('especialidades', function (Blueprint $col) {
-            $col->id();
-            $col->string('nome');
-            $col->string('status')->default('ativa');
-            $col->timestamps();
-        });
+        if (!Schema::hasTable('especialidades')) {
+            Schema::create('especialidades', function (Blueprint $col) {
+                $col->id();
+                $col->string('nome');
+                $col->string('status')->default('ativa');
+                $col->timestamps();
+            });
+        }
     }
 
     /**
