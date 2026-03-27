@@ -11,8 +11,6 @@
     <ul>
         <li>Data: {{ $params['data'] ?? 'N/A' }}</li>
         <li>Horário: {{ $params['horario'] ?? 'N/A' }}</li>
-        <li>Valor: R$ {{ number_format($params['valor'] ?? 0, 2, ',', '.') }}</li>
-        <li>Pagamento: {{ $params['pagamento'] ?? 'Pendente' }}</li>
     </ul>
     
     <p>Atenciosamente,<br>Equipe Medical Place</p>
