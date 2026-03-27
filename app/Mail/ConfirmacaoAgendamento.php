@@ -32,6 +32,7 @@ class ConfirmacaoAgendamento extends Mailable implements ShouldQueue
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
                     ->subject('Agendamento Confirmado - Medical Place')
-                    ->view('emails.confirmacao_agendamento');
+                    ->view('emails.confirmacao_agendamento')
+                    ->with($this->params);
     }
 }

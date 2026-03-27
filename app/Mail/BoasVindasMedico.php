@@ -32,6 +32,7 @@ class BoasVindasMedico extends Mailable implements ShouldQueue
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
                     ->subject('Bem-vindo à Medical Place!')
-                    ->view('emails.boas_vindas_medico');
+                    ->view('emails.boas_vindas_medico')
+                    ->with($this->params);
     }
 }

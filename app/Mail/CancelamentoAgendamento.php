@@ -32,6 +32,7 @@ class CancelamentoAgendamento extends Mailable implements ShouldQueue
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
                     ->subject('Agendamento Cancelado - Medical Place')
-                    ->view('emails.cancelamento_agendamento');
+                    ->view('emails.cancelamento_agendamento')
+                    ->with($this->params);
     }
 }
