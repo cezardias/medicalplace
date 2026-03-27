@@ -32,6 +32,8 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
+            $log_msg = "[" . date('Y-m-d H:i:s') . "] Enviando CONFIRMACAO para: $email_destino\n";
+            file_put_contents('/tmp/mail_debug.txt', $log_msg, FILE_APPEND);
             Log::info("DEBUG-MAIL: Enviando Confirmação para $email_destino");
             
             $sent = Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
@@ -55,6 +57,8 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
+            $log_msg = "[" . date('Y-m-d H:i:s') . "] Enviando CANCELAMENTO para: $email_destino\n";
+            file_put_contents('/tmp/mail_debug.txt', $log_msg, FILE_APPEND);
             Log::info("DEBUG-MAIL: Enviando Cancelamento para $email_destino");
             
             $sent = Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
@@ -78,6 +82,8 @@ class EmailEmergencyModule
         try {
             self::setSMTP();
             $email_destino = strtolower(trim($email_destino));
+            $log_msg = "[" . date('Y-m-d H:i:s') . "] Enviando BOAS-VINDAS para: $email_destino\n";
+            file_put_contents('/tmp/mail_debug.txt', $log_msg, FILE_APPEND);
             Log::info("DEBUG-MAIL: Enviando Boas-vindas para $email_destino");
             
             $sent = Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
