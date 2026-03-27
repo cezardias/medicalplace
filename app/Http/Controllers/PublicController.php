@@ -476,6 +476,16 @@ class PublicController extends Controller
                 return redirect()->route('cadastro_novo_medico');
             }
 
+            // Send Welcome Email
+            try {
+                \Mail::to($request->get('email'))->queue(new \App\Mail\BoasVindasMedico([
+                    'nome' => $request->get('name'),
+                    'email' => $request->get('email')
+                ]));
+            } catch (\Exception $e) {
+                \Log::error("Failed to send welcome email: " . $e->getMessage());
+            }
+
             // Dispatch Webhook
             \App\Helpers\WebhookHelper::dispatch('user.registered', [
                 'id' => $user_id,
