@@ -230,6 +230,14 @@ class PublicController extends Controller
         $ocorrencias_rep = new SalasOcorrenciasRepository();
         $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
         $horarios = $request->get('horario');
+        $horario_selecionado = [];
+        if (is_array($horarios)) {
+            foreach ($horarios as $hora => $status) {
+                if ($status == "1" || $status == 1) {
+                    $horario_selecionado[] = $hora;
+                }
+            }
+        }
 
         $ocorrencias_rep = new SalasOcorrenciasRepository();
         $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
