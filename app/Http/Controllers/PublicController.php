@@ -133,6 +133,15 @@ class PublicController extends Controller
                     $horario_selecionado[] = $hora;
                 }
             }
+
+            // Fallback se o array veio no formato de lista [0 => '08:00']
+            if (empty($horario_selecionado)) {
+                foreach ($horarios as $v) {
+                    if (is_string($v) && preg_match('/^\d{2}:\d{2}$/', $v)) {
+                        $horario_selecionado[] = $v;
+                    }
+                }
+            }
         }
 
         $valor_total = $sala->valor_periodo * count($horario_selecionado);
