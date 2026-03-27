@@ -186,7 +186,7 @@ class SalasOcorrenciasRepository
 
     public function getParaCancelar($id) {
         $reserva = DB::table('salas_ocorrencias')
-        ->select('salas.valor_periodo','salas_ocorrencias.user_id')
+        ->select('salas.valor_periodo','salas_ocorrencias.user_id', 'salas.nome', 'salas_ocorrencias.data', 'salas_ocorrencias.hora', 'salas_ocorrencias.status')
         ->join('salas', 'salas.id', '=', 'salas_ocorrencias.sala_id')
         ->where('salas_ocorrencias.id',$id)
         ->first();
