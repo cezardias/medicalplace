@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Mail\ConfirmacaoAgendamento;
-use App\Mail\CancelamentoAgendamento;
 
 use App\PagSeguro;
 use App\Salas;
@@ -117,22 +115,33 @@ class PublicController extends Controller
 
 
 
+        dump(Session::all());
+        dd($request);
+        die;
     }
 
 
-    public function checkoutAgendamento(Request $request) {
+    public function checkoutAgendamento(Request $request)
+    {
+
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
 
-        $valor_total = $sala->valor_periodo * count($request->get('horario'));
+        $horario_selecionado = array();
+        foreach ($request->get('horario') as $hora => $val) {
+            if ($val == 1)
+                $horario_selecionado[] = $hora;
+        }
+
+        $valor_total = $sala->valor_periodo * count($horario_selecionado);
 
         $cards_rep = new UsersCardsRepository();
         $creditos_rep = new CreditosRepository();
 
-        return view('public.checkout',[
+        return view('public.checkout', [
             'sala' => $sala,
             'data_agendamento' => $request->get('data_agendamento'),
-            'horario_selecionado' => $request->get('horario'),
+            'horario_selecionado' => $horario_selecionado,
             'valor_total' => $valor_total,
             'cartoes_cadastrados' => $cards_rep->getMeusCartoes(Auth::user()->id),
             'creditos' => $creditos_rep->getExtrato(Auth::user()->id)
@@ -163,24 +172,48 @@ class PublicController extends Controller
         $teste_log['inicio'] = '-----------------------------------';
         $cartao = null;
         if (!empty($request->get('card_id'))) {
-            $cards_rep = new UsersCardsRepository();
-            $cartao = $cards_rep->getCard($request->get('card_id'))->payment_method->card->id;
+            $cartao = UsersCards::find($request->get('card_id'));
         }
 
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
+        $horarios_input = $request->get('horario');
+        $qtde_selecionada = 0;
+        if (is_array($horarios_input)) {
+            foreach ($horarios_input as $stat) {
+                if ($stat == 1 || $stat == "1") {
+                    $qtde_selecionada++;
+                }
+            }
+        }
+        $valor_total = $sala->valor_periodo * $qtde_selecionada;
+
+        $creditos_rep = new CreditosRepository();
+        $creditos_usuario = $creditos_rep->getExtrato(Auth::user()->id);
 
         $credito_selecionado = 0;
         if (!empty($request->get('credito_selecionado'))) {
-            $credito_selecionado = (float)str_replace(',', '.', str_replace('.', '', $request->get('credito_selecionado')));
+            $credito_selecionado = number_format((float) $request->get('credito_selecionado'), 2, '.', ',');
+            if ($credito_selecionado > $creditos_usuario['saldo']) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Créditos inválidos'
+                ]);
+            }
+            $valor_total = $valor_total - $credito_selecionado;
         }
-
-        $valor_total = ($sala->valor_periodo * count($request->get('horario'))) - $credito_selecionado;
 
         if ($valor_total < 0) {
             return response()->json([
                 'status' => false,
-                'message' => 'Erro ao processar o pagamento.'
+                'message' => 'Valores inseridos não conferem. Tente novamente.'
+            ]);
+        }
+
+        if (empty($request->get('horario'))) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Horário selecionado inválido.'
             ]);
         }
 
@@ -194,15 +227,50 @@ class PublicController extends Controller
 
         $ocorrencias_rep = new SalasOcorrenciasRepository();
         $data = Carbon::createFromFormat('d/m/Y', $request->get('data_agendamento'));
+        $horarios = $request->get('horario');
 
+        $ocorrencias_rep = new SalasOcorrenciasRepository();
+        $horarios_disponiveis = $ocorrencias_rep->getHorariosFuncionamento();
+        $horarios_ocupados = $ocorrencias_rep->getOcorrencias($data->format('Y-m-d 00:00:00'), $request->get('sala'));
+
+        foreach ($horarios as $hora) {
+            if (!in_array($hora, $horarios_disponiveis) || in_array($hora, $horarios_ocupados)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Horário selecionado inválido.'
+                ]);
+            }
+        }
+
+        $teste_log['horarios'] = $horarios;
+        $teste_log['valor_total'] = $valor_total;
         $pagamento = [];
         if ($valor_total > 0) {
             $pagseguro = new Pagseguro();
             $pagamento = $pagseguro->charge($request, $valor_total, $cartao, Auth::user()->id);
+            /*$pagamento['status'] = true;
+
+            $dados = (object)[];
+            $dados->id = 1;
+            $dados->reference_id = 1;
+
+
+            $dados->amount = (object)[];
+            $dados->amount->value = 35;
+
+            $dados->payment_response = (object)[];
+            $dados->payment_response->code = 2000;
+
+            $dados->payment_method = (object)[];
+            $dados->payment_method->card = 123;
+
+            $pagamento['retorno'] = $dados;
+            $pagamento['mensagem'] = 'teste ok';*/
         } else {
             $pagamento['status'] = true;
         }
 
+        $teste_log['pagamento'] = $pagamento;
         if ($pagamento['status'] == true) {
             $transacao = null;
             if ($valor_total > 0) {
@@ -219,24 +287,43 @@ class PublicController extends Controller
                 $credito_rep->grava(Auth::user()->id, $credito_selecionado, 'debito');
             }
 
-            foreach ($request->get('horario') as $hora => $val) {
+            foreach ($horarios as $hora) {
+                $teste_log['gravaOcorrencia'] = 'Sala:' . $request->get('sala') . ', consulta, data:' . $data . $hora . ":00";
                 $ocorrencias_rep->gravaOcorrencia($request->get('sala'), 'consulta', $data, $hora . ":00", null, $transacao);
             }
 
-            $fresh_user = \App\User::find(Auth::user()->id);
+            $salas_rep = new SalasRepository();
+            $sala = $salas_rep->getSala($request->get('sala'));
+
             $params = array();
-            $params['nome'] = $fresh_user->name . " " . $fresh_user->sobrenome;
+            $params['medico'] = Auth::user()->name . " " . Auth::user()->sobrenome;
+            $params['nome'] = Auth::user()->name . " " . Auth::user()->sobrenome; // Compatibilidade com template
             $params['sala'] = $sala->nome . '-' . $sala->numero;
+            
+            // Garantindo que apenas os horários marcados como selecionados vão para o e-mail
+            $h_selecionados = [];
+            if (is_array($horarios)) {
+                foreach ($horarios as $hora_key => $stat) {
+                    if ($stat == 1 || $stat == "1") {
+                        $h_selecionados[] = $hora_key;
+                    }
+                }
+            }
+            $params['horarios'] = $h_selecionados;
+            
             $params['data'] = $data->format('d/m/Y');
-            $params['horarios'] = is_array($request->get('horario')) ? array_keys($request->get('horario')) : [];
+            $params['credito_selecionado'] = $credito_selecionado;
+            $params['valor_total'] = $valor_total;
 
-            \App\Services\EmailEmergencyModule::enviarConfirmacao($params, $fresh_user->email);
+            \App\Services\EmailEmergencyModule::enviarConfirmacao($params, Auth::user()->email);
 
+            Log::debug($teste_log);
             return response()->json([
                 'status' => true,
                 'message' => 'Reserva feita com sucesso'
             ]);
         } else {
+            Log::debug($teste_log);
             return response()->json([
                 'status' => false,
                 'message' => $pagamento['mensagem']
@@ -267,7 +354,7 @@ class PublicController extends Controller
             $erro = false;
             if (!empty($request->get('senha'))) {
                 if ($request->get('senha') != $request->get('resenha')) {
-                   
+                    $erro = true;
                     Session::flash(
                         'toastr',
                         [
@@ -344,21 +431,21 @@ class PublicController extends Controller
                 null
             );
 
+            // Send Cancellation Email
+            $medico = User::find($reserva->user_id);
+            $params = [
+                'medico' => $medico->name . " " . $medico->sobrenome,
+                'sala' => $reserva->nome,
+                'data' => Carbon::parse($reserva->data)->format('d/m/Y'),
+                'horarios' => [$reserva->hora]
+            ];
+
+            try {
+                \Mail::to($medico->email)->queue(new \App\Mail\CancelamentoAgendamento($params));
+            } catch (\Exception $e) {
+                \Log::error("Failed to send cancellation email: " . $e->getMessage());
+            }
         });
-
-        // Send Cancellation Email
-        $medico = User::find($reserva->user_id);
-        $params = [
-            'nome' => $medico->name . " " . $medico->sobrenome,
-            'sala' => $reserva->nome,
-            'data' => Carbon::parse($reserva->data)->format('d/m/Y'),
-            'horarios' => [$reserva->hora]
-        ];
-
-        \App\Services\EmailEmergencyModule::enviarCancelamento($params, $medico->email);
-
-        // Dispatch Webhook
-        \App\Helpers\WebhookHelper::dispatch('appointment.canceled', $params);
 
         Session::flash('toastr', [
             'status' => 'success',
@@ -396,21 +483,6 @@ class PublicController extends Controller
                 );
                 return redirect()->route('cadastro_novo_medico');
             }
-
-            // Send Welcome Email
-            \App\Services\EmailEmergencyModule::enviarBoasVindas([
-                'nome' => $request->get('name'),
-                'email' => $request->get('email')
-            ], $request->get('email'));
-
-            // Dispatch Webhook
-            \App\Helpers\WebhookHelper::dispatch('user.registered', [
-                'id' => $user_id,
-                'name' => $request->get('name'),
-                'email' => $request->get('email'),
-                'telefone' => $request->get('telefone')
-            ]);
-
             Session::flash(
                 'toastr',
                 [
