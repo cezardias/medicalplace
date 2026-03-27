@@ -13,14 +13,16 @@ class CreateWebhooksTable extends Migration
      */
     public function up()
     {
-        Schema::create('webhooks', function (Blueprint $table) {
-            $table->id();
-            $table->string('url');
-            $table->string('event'); // e.g., appointment.created
-            $table->string('secret')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('webhooks')) {
+            Schema::create('webhooks', function (Blueprint $table) {
+                $table->id();
+                $table->string('url');
+                $table->string('event'); // e.g., appointment.created
+                $table->string('secret')->nullable();
+                $table->enum('status', ['active', 'inactive'])->default('active');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
