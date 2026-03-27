@@ -252,8 +252,6 @@ class PublicController extends Controller
             }
         }
 
-        $teste_log['horarios'] = $horarios;
-        $teste_log['valor_total'] = $valor_total;
         $pagamento = [];
         if ($valor_total > 0) {
             $pagseguro = new Pagseguro();
@@ -280,7 +278,6 @@ class PublicController extends Controller
             $pagamento['status'] = true;
         }
 
-        $teste_log['pagamento'] = $pagamento;
         if ($pagamento['status'] == true) {
             $transacao = null;
             if ($valor_total > 0) {
@@ -298,7 +295,6 @@ class PublicController extends Controller
             }
 
             foreach ($horarios as $hora) {
-                $teste_log['gravaOcorrencia'] = 'Sala:' . $request->get('sala') . ', consulta, data:' . $data . $hora . ":00";
                 $ocorrencias_rep->gravaOcorrencia($request->get('sala'), 'consulta', $data, $hora . ":00", null, $transacao);
             }
 
@@ -314,16 +310,12 @@ class PublicController extends Controller
             // Dispatch Webhook
             \App\Helpers\WebhookHelper::dispatch('appointment.created', $params);
 
-            $teste_log['EMAIL'] = $params;
-            #return view('emails.confirmacao_agendamento', $params);
             \App\Services\EmailEmergencyModule::enviarConfirmacao($params, $fresh_user->email);
-            \Log::debug($teste_log);
             return response()->json([
                 'status' => true,
                 'message' => 'Reserva feita com sucesso'
             ]);
         } else {
-            Log::debug($teste_log);
             return response()->json([
                 'status' => false,
                 'message' => $pagamento['mensagem']
