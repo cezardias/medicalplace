@@ -177,16 +177,7 @@ class PublicController extends Controller
 
         $salas_rep = new SalasRepository();
         $sala = $salas_rep->getSala($request->get('sala'));
-        $horarios_input = $request->get('horario');
-        $qtde_selecionada = 0;
-        if (is_array($horarios_input)) {
-            foreach ($horarios_input as $stat) {
-                if ($stat == 1 || $stat == "1") {
-                    $qtde_selecionada++;
-                }
-            }
-        }
-        $valor_total = $sala->valor_periodo * $qtde_selecionada;
+        $valor_total = $sala->valor_periodo * count($request->get('horario'));
 
         $creditos_rep = new CreditosRepository();
         $creditos_usuario = $creditos_rep->getExtrato(Auth::user()->id);
@@ -297,26 +288,16 @@ class PublicController extends Controller
 
             $params = array();
             $params['medico'] = Auth::user()->name . " " . Auth::user()->sobrenome;
-            $params['nome'] = Auth::user()->name . " " . Auth::user()->sobrenome; // Compatibilidade com template
             $params['sala'] = $sala->nome . '-' . $sala->numero;
-            
-            // Garantindo que apenas os horários marcados como selecionados vão para o e-mail
-            $h_selecionados = [];
-            if (is_array($horarios)) {
-                foreach ($horarios as $hora_key => $stat) {
-                    if ($stat == 1 || $stat == "1") {
-                        $h_selecionados[] = $hora_key;
-                    }
-                }
-            }
-            $params['horarios'] = $h_selecionados;
-            
+            $params['horarios'] = $horarios;
             $params['data'] = $data->format('d/m/Y');
             $params['credito_selecionado'] = $credito_selecionado;
             $params['valor_total'] = $valor_total;
 
+            $teste_log['EMAIL'] = $params;
+            #return view('emails.confirmacao_agendamento', $params);
+            $params['nome'] = $params['medico']; // Compatibilidade com template
             \App\Services\EmailEmergencyModule::enviarConfirmacao($params, Auth::user()->email);
-
             Log::debug($teste_log);
             return response()->json([
                 'status' => true,
