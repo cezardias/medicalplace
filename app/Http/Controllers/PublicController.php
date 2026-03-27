@@ -302,19 +302,24 @@ class PublicController extends Controller
             $salas_rep = new SalasRepository();
             $sala = $salas_rep->getSala($request->get('sala'));
 
+            $user_email = Auth::user()->email;
             $params = array();
             $params['medico'] = Auth::user()->name . " " . Auth::user()->sobrenome;
+            $params['nome'] = $params['medico']; 
             $params['sala'] = $sala->nome . '-' . $sala->numero;
             $params['horarios'] = $horarios;
+            $params['horario'] = implode(', ', $horarios);
             $params['data'] = $data->format('d/m/Y');
-            $params['credito_selecionado'] = $credito_selecionado;
+            $params['valor'] = $valor_total;
             $params['valor_total'] = $valor_total;
+            $params['pagamento'] = 'Confirmado';
 
-            $teste_log['EMAIL'] = $params;
-            #return view('emails.confirmacao_agendamento', $params);
-            $params['nome'] = $params['medico']; // Compatibilidade com template
-            \App\Services\EmailEmergencyModule::enviarConfirmacao($params, Auth::user()->email);
-            Log::debug($teste_log);
+            try {
+                \App\Services\EmailEmergencyModule::enviarConfirmacao($params, $user_email);
+            } catch (\Exception $e) {
+                Log::error("EMERGENCY-MAIL: Erro confirmacao: " . $e->getMessage());
+            }
+
             return response()->json([
                 'status' => true,
                 'message' => 'Reserva feita com sucesso'
@@ -486,11 +491,13 @@ class PublicController extends Controller
             );
 
             // Envio Síncrono de Boas-vindas
+            $user_email = $request->get('email');
             $params = [
                 'nome' => $request->get('name') . " " . $request->get('sobrenome'),
-                'email' => $request->get('email')
+                'medico' => $request->get('name') . " " . $request->get('sobrenome'),
+                'email' => $user_email
             ];
-            \App\Services\EmailEmergencyModule::enviarBoasVindas($params, $request->get('email'));
+            \App\Services\EmailEmergencyModule::enviarBoasVindas($params, $user_email);
 
             //return redirect()->route('usuario.index');
             return redirect()->route('login');
