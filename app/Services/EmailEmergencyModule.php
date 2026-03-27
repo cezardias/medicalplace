@@ -34,7 +34,7 @@ class EmailEmergencyModule
             
             \Mail::send('emails.confirmacao_agendamento', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject('Agendamento Confirmado - Medical Place');
+                $m->to($email_destino)->subject('Agendamento Medical Place');
             });
             
             return true;
@@ -52,8 +52,8 @@ class EmailEmergencyModule
             Log::info("EMERGENCY-MAIL: Enviando CANCELAMENTO para $email_destino");
             
             \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
-                $m->from('naoresponder@medicalplace.med.br', 'Medical Place [V2]');
-                $m->to($email_destino)->subject('CANCELADO (TESTE DE VERSÃO V2) - Medical Place');
+                $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
+                $m->to($email_destino)->subject('Agendamento Medical Place');
             });
             
             return true;
@@ -72,7 +72,7 @@ class EmailEmergencyModule
             
             \Mail::send('emails.boas_vindas_medico', ['params' => $params], function ($m) use ($email_destino) {
                 $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject('Bem-vindo a Medical Place!');
+                $m->to($email_destino)->subject('Acesso Medical Place');
             });
             
             return true;
