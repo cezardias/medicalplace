@@ -4,14 +4,12 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ConfirmacaoAgendamento;
-use App\Mail\CancelamentoAgendamento;
-use App\Mail\BoasVindasMedico;
+use App\Mail\DirectMail;
 
 class EmailEmergencyModule
 {
     /**
-     * Envia e-mail de confirmação (Síncrono)
+     * Envia e-mail de confirmação (Síncrono via DirectMail)
      */
     public static function enviarConfirmacao($params, $email_destino)
     {
@@ -19,7 +17,7 @@ class EmailEmergencyModule
             $email_destino = strtolower(trim($email_destino));
             Log::info("DEBUG-MAIL: Iniciando Confirmação para $email_destino");
             
-            $sent = Mail::to($email_destino)->send(new ConfirmacaoAgendamento($params));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.confirmacao_agendamento', 'Agendamento Confirmado - Medical Place'));
             
             Log::info("DEBUG-MAIL: Resultado Confirmação: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
@@ -30,7 +28,7 @@ class EmailEmergencyModule
     }
 
     /**
-     * Envia e-mail de cancelamento (Síncrono)
+     * Envia e-mail de cancelamento (Síncrono via DirectMail)
      */
     public static function enviarCancelamento($params, $email_destino)
     {
@@ -38,7 +36,7 @@ class EmailEmergencyModule
             $email_destino = strtolower(trim($email_destino));
             Log::info("DEBUG-MAIL: Iniciando Cancelamento para $email_destino");
             
-            $sent = Mail::to($email_destino)->send(new CancelamentoAgendamento($params));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.cancelamento_agendamento', 'Agendamento Cancelado - Medical Place'));
             
             Log::info("DEBUG-MAIL: Resultado Cancelamento: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;
@@ -49,7 +47,7 @@ class EmailEmergencyModule
     }
 
     /**
-     * Envia e-mail de boas-vindas (Síncrono)
+     * Envia e-mail de boas-vindas (Síncrono via DirectMail)
      */
     public static function enviarBoasVindas($params, $email_destino)
     {
@@ -57,7 +55,7 @@ class EmailEmergencyModule
             $email_destino = strtolower(trim($email_destino));
             Log::info("DEBUG-MAIL: Iniciando Boas-vindas para $email_destino");
             
-            $sent = Mail::to($email_destino)->send(new BoasVindasMedico($params));
+            $sent = Mail::to($email_destino)->send(new DirectMail($params, 'emails.boas_vindas_medico', 'Bem-vindo a Medical Place!'));
             
             Log::info("DEBUG-MAIL: Resultado Boas-vindas: " . ($sent ? "ENVIADO" : "FALHA_SILENCIOSA"));
             return true;

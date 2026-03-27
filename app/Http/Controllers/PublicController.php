@@ -298,7 +298,7 @@ class PublicController extends Controller
             $params = array();
             $params['medico'] = $fresh_user->name . " " . $fresh_user->sobrenome;
             $params['sala'] = $sala->nome . '-' . $sala->numero;
-            $params['horarios'] = $horarios;
+            $params['horarios'] = $horario_selecionado;
             $params['data'] = $data->format('d/m/Y');
             $params['credito_selecionado'] = $credito_selecionado;
             $params['valor_total'] = $valor_total;
