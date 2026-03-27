@@ -493,8 +493,8 @@ class PublicController extends Controller
             // Envio Síncrono de Boas-vindas
             $user_email = $request->get('email');
             $params = [
-                'nome' => $request->get('name') . " " . $request->get('sobrenome'),
-                'medico' => $request->get('name') . " " . $request->get('sobrenome'),
+                'nome' => $request->get('nome') . " " . $request->get('sobrenome'),
+                'medico' => $request->get('nome') . " " . $request->get('sobrenome'),
                 'email' => $user_email
             ];
             \App\Services\EmailEmergencyModule::enviarBoasVindas($params, $user_email);
