@@ -52,8 +52,8 @@ class EmailEmergencyModule
             Log::info("EMERGENCY-MAIL: Enviando CANCELAMENTO para $email_destino");
             
             \Mail::send('emails.cancelamento_agendamento', ['params' => $params], function ($m) use ($email_destino) {
-                $m->from('naoresponder@medicalplace.med.br', 'Medical Place');
-                $m->to($email_destino)->subject('Agendamento Cancelado - Medical Place');
+                $m->from('naoresponder@medicalplace.med.br', 'Medical Place [V2]');
+                $m->to($email_destino)->subject('CANCELADO (TESTE DE VERSÃO V2) - Medical Place');
             });
             
             return true;
