@@ -189,7 +189,7 @@ if (!empty($retorno)) {
             CURLOPT_SSL_VERIFYPEER => false, // Somente localhost
 
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_URL => "{$this->url}/charges",
+            CURLOPT_URL => rtrim($this->url, '/') . "/charges",
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_HTTPHEADER => array(
                 "Content-type: application/json",
@@ -202,10 +202,11 @@ if (!empty($retorno)) {
         );
 
         $response = curl_exec($curl);
-        $curl_info = curl_getinfo($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $err = curl_error($curl);
         curl_close($curl);
 
+        \Log::info("PagSeguro HTTP Code: " . $http_code);
         \Log::info("PagSeguro Response: ". $response);
 
         if (!empty($err)) {
@@ -244,6 +245,7 @@ if (!empty($retorno)) {
                 );
             }
         } else {
+            \Log::error("PagSeguro Invalid JSON Response. HTTP Code: " . $http_code . " Raw Response: " . $response);
             return array(
                 'status' => false,
                 'mensagem' => 'RESPOSTA INVÁLIDA DO PAGSEGURO.'
