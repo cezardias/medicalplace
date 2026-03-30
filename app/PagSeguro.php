@@ -115,7 +115,8 @@ if (!empty($retorno)) {
                 "exp_year" => $exp_data->format('Y'),
                 "security_code" => $cvv,
                 "holder" => [
-                    "name" => $request->get('nome_titular')
+                    "name" => $request->get('nome_titular'),
+                    "tax_id" => preg_replace('/\D/', '', $user->cpf)
                 ]
             ];
         }
@@ -193,7 +194,8 @@ if (!empty($retorno)) {
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_HTTPHEADER => array(
                 "Content-type: application/json",
-                "Authorization: Bearer ".$this->token,
+                "Accept: application/json",
+                "Authorization: Bearer ".trim($this->token),
                 "X-idempotency-key: " . uniqid()
             ),
             CURLOPT_RETURNTRANSFER => true,
@@ -206,6 +208,8 @@ if (!empty($retorno)) {
         $err = curl_error($curl);
         curl_close($curl);
 
+        \Log::info("PagSeguro Request URL: " . rtrim($this->url, '/') . "/charges");
+        \Log::info("PagSeguro Token Prefix: " . substr(trim($this->token), 0, 8) . "...");
         \Log::info("PagSeguro HTTP Code: " . $http_code);
         \Log::info("PagSeguro Response: ". $response);
 
