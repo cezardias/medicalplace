@@ -678,7 +678,6 @@ class AdminController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            \Log::error("checkoutAgendamento Error: " . $e->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Erro interno ao processar agendamento: ' . $e->getMessage()

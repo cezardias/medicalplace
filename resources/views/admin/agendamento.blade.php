@@ -543,6 +543,7 @@
                 method: "POST",
                 data: $('#checkout').serialize(),
                 success: function(retorno) {
+                    alert("Response received: " + JSON.stringify(retorno));
                     console.log("AJAX Success:", retorno);
                     if (retorno.status == false) {
                         toastr["warning"](retorno.message);

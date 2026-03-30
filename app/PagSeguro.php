@@ -156,8 +156,10 @@ if (!empty($retorno)) {
         $err = curl_error($curl);
         curl_close($curl);
 
+        /*
         \Log::info("PagSeguro Payload: ". $json_params);
         \Log::info("PagSeguro Response: ". $response);
+        */
 
         if (!empty($err)) {
             \Log::error("PagSeguro cURL Error: " . $err);
