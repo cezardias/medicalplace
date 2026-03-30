@@ -124,7 +124,7 @@
                     <div class="form-group form-row">
                         <div class="col-12">
                             <label for="">Valor da cobrança</label>
-                            <input type="text" name="valor_cobranca" id="valor_cobranca" value="{{ number_format($valor,2) }}" class="form-control moeda">
+                            <input type="text" name="valor_cobranca" id="valor_cobranca" value="{{ number_format($valor,2,',','.') }}" class="form-control moeda">
                             <small id="valorHelp" class="form-text text-muted help-error">Aplicar desconto se houver</small>
                         </div>
                     </div>
@@ -542,15 +542,19 @@
                 url: "{{ route('admin.checkout_agendamento') }}",
                 method: "POST",
                 data: $('#checkout').serialize(),
-                complete: function(response) {
-                    let retorno = jQuery.parseJSON(response.responseText);
+                success: function(retorno) {
                     if (retorno.status == false) {
                         toastr["warning"](retorno.message);
                     } else {
                         toastr["success"](retorno.message);
                         window.location.replace("{{ route('admin.agendamento') }}");
                     }
-                    $('#exampleModalCenter').modal('toggle');
+                },
+                error: function(xhr) {
+                    toastr["error"]("Erro no servidor ao processar o agendamento.");
+                },
+                complete: function() {
+                    $('#exampleModalCenter').modal('hide');
                 }
             });
 

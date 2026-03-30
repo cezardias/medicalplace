@@ -295,13 +295,17 @@
                 url: "{{ route('admin.checkout_venda_credito') }}",
                 method: "POST",
                 data: $('#checkout').serialize(),
-                complete: function(response) {
-                    let retorno = jQuery.parseJSON(response.responseText);
+                success: function(retorno) {
                     if (retorno.status == false) {
                         toastr["warning"](retorno.message);
                     } else {
                         toastr["success"](retorno.message);
                     }
+                },
+                error: function(xhr) {
+                    toastr["error"]("Erro no servidor ao processar o pagamento.");
+                },
+                complete: function() {
                     $('#exampleModalCenter').modal('hide');
                 }
             });

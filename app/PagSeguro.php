@@ -95,7 +95,12 @@ if (!empty($retorno)) {
             ];
         } else {
             $numero_cartao = \App\Helper\Funcoes::instance()->onlyNumbers($request->get('numero_cartao'));
-            $exp_data = Carbon::createFromFormat('m/y',$request->get('validade'));
+            $validade = str_replace(' ', '', $request->get('validade'));
+            if (strlen($validade) == 5) {
+                $exp_data = Carbon::createFromFormat('m/y', $validade);
+            } else {
+                $exp_data = Carbon::createFromFormat('m/Y', $validade);
+            }
             
             $card_data = [
                 "number" => $numero_cartao,

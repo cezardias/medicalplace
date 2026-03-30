@@ -480,59 +480,62 @@ class AdminController extends Controller
     }
 
     public function checkoutVendaCredito(Request $request)
-    {
+        try {
+            $valor_credito = str_replace(',', '.', str_replace('.', '', $request->get('valor_credito')));
+            $valor_cobranca = str_replace(',', '.', str_replace('.', '', $request->get('valor_cobranca')));
 
-        if ($request->get('produto') != 1009) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Produto inválido'
-            ]);
-        }
+            $creditos_rep = new CreditosRepository();
+            $transacoes_rep = new TransacoesRepository();
 
-        $valor_credito = str_replace(',', '.', str_replace('.', '', $request->get('valor_credito')));
-        $valor_cobranca = str_replace(',', '.', str_replace('.', '', $request->get('valor_cobranca')));
-
-        $creditos_rep = new CreditosRepository();
-        $transacoes_rep = new TransacoesRepository();
-
-        // Pagamento presencial com maquina só credita
-        if (!empty($request->get('presencial'))) {
-            /* CRIA TRANSACAO E CREDITO */
-            $transacao = $transacoes_rep->createPresencial($valor_cobranca, null, $request->get('medico'));
-            $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
-            return response()->json([
-                'status' => true,
-                'message' => 'Creditado com sucesso'
-            ]);
-        }
-
-        $cartao = array();
-        if (!empty($request->get('cartao_precadastrado'))) {
-            $cartao = UsersCards::find($request->get('cartao_precadastrado'));
-        }
-
-        $pagseguro = new Pagseguro();
-        $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $request->get('medico'));
-
-        if ($pagamento['status'] == true) {
-
-            /* CRIA TRANSACAO E CREDITO */
-            $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
-            $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
-
-            if (!empty($request->get('gravar_cartao'))) {
-                $cards_rep = new UsersCardsRepository();
-                $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
+            // Pagamento presencial com maquina só credica
+            if (!empty($request->get('presencial'))) {
+                /* CRIA TRANSACAO E CREDITO */
+                $transacao = $transacoes_rep->createPresencial($valor_cobranca, null, $request->get('medico'));
+                $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Creditado com sucesso'
+                ]);
             }
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Creditado com sucesso'
-            ]);
-        } else {
+            $cartao = array();
+            if (!empty($request->get('cartao_precadastrado'))) {
+                $cartao = UsersCards::find($request->get('cartao_precadastrado'));
+            }
+
+            $pagamento = ['status' => true, 'retorno' => null];
+            
+            if ($valor_cobranca > 0) {
+                $pagseguro = new Pagseguro();
+                $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $request->get('medico'));
+            }
+
+            if ($pagamento['status'] == true) {
+
+                /* CRIA TRANSACAO E CREDITO */
+                $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
+                $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
+
+                if (!empty($request->get('gravar_cartao'))) {
+                    $cards_rep = new UsersCardsRepository();
+                    $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Creditado com sucesso'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => $pagamento['mensagem']
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error("checkoutVendaCredito Error: " . $e->getMessage());
             return response()->json([
                 'status' => false,
-                'message' => $pagamento['mensagem']
+                'message' => 'Erro interno ao processar pagamento: ' . $e->getMessage()
             ]);
         }
     }
@@ -545,96 +548,47 @@ class AdminController extends Controller
         $ocorrencias_rep = new SalasOcorrenciasRepository();
         $salas_rep = new SalasRepository();
 
-        $credito_medico = $creditos_rep->getExtrato($request->get('medico'));
+        try {
+            $credito_medico = $creditos_rep->getExtrato($request->get('medico'));
 
-        /* Valor do crédito que será usado */
-        $valor_credito = str_replace(',', '.', str_replace('.', '', $request->get('valor_credito')));
-        /* Restante que será cobrado */
-        $valor_cobranca = str_replace(',', '.', str_replace('.', '', $request->get('valor_cobranca')));
+            /* Valor do crédito que será usado */
+            $valor_credito = str_replace(',', '.', str_replace('.', '', $request->get('valor_credito')));
+            /* Restante que será cobrado */
+            $valor_cobranca = str_replace(',', '.', str_replace('.', '', $request->get('valor_cobranca')));
 
-        /** Intervalo de datas */
-        $data_inicial = Carbon::createFromFormat('d/m/Y', $request->get('data_inicial'));
-        $data_final = Carbon::createFromFormat('d/m/Y', $request->get('data_final'));
-        $horarios_sel = array();
-        foreach ($request->get('horario') as $hora => $sel) {
-            if ($sel == 1) {
-                $horarios_sel[] = $hora;
+            /** Intervalo de datas */
+            $data_inicial = Carbon::createFromFormat('d/m/Y', $request->get('data_inicial'));
+            $data_final = Carbon::createFromFormat('d/m/Y', $request->get('data_final'));
+            $horarios_sel = array();
+            foreach ($request->get('horario') as $hora => $sel) {
+                if ($sel == 1) {
+                    $horarios_sel[] = $hora;
+                }
             }
-        }
 
-        /** Re-verifica se horários estão livres */
-        $ocorrencias = $ocorrencias_rep->buscaOcorrencias($salas_rep->getSala($request->get('sala')), $horarios_sel, $data_inicial, $data_final);
-        if ($ocorrencias) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Horário indisponível. Tente novamente.'
-            ]);
-        }
-
-        /** Fará a cobrança por maquininha */
-        if (!empty($request->get('presencial'))) {
-            /* CRIA TRANSACAO E CREDITO */
-            $transacao = null;
-            if ($valor_cobranca > 0)
-                $transacao = $transacoes_rep->createPresencial($valor_cobranca, $request->get('sala'), $request->get('medico'));
-
-            if ($valor_credito >= 0 && $valor_credito <= $credito_medico['saldo'])
-                $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'debito', null);
-            else {
+            /** Re-verifica se horários estão livres */
+            $ocorrencias = $ocorrencias_rep->buscaOcorrencias($salas_rep->getSala($request->get('sala')), $horarios_sel, $data_inicial, $data_final);
+            if ($ocorrencias) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Saldo de créditos insuficiente.'
+                    'message' => 'Horário indisponível. Tente novamente.'
                 ]);
             }
 
-            $ocorrencias = $ocorrencias_rep->gravaIntervalo($data_inicial, $data_final, $horarios_sel, $request->get('medico'), $request->get('sala'), $transacao);
-
-            /**
-             * Envio de email confirmação
-             */
-            $salas_rep = new SalasRepository();
-            $sala = $salas_rep->getSala($request->get('sala'));
-
-            $medico = User::find($request->get('medico'));
-
-            $params = array();
-            $params['medico'] = $medico->name . " " . $medico->sobrenome;
-            $params['email'] = $medico->email;
-            $params['sala'] = $sala->nome . '-' . $sala->numero;
-            $params['horarios'] = $horarios_sel;
-            $params['data'] = $data_inicial->format('d/m/Y') . " até " . $data_final->format('d/m/Y');
-            $params['credito_selecionado'] = $valor_credito;
-            $params['valor_total'] = $valor_cobranca;
-
-            try {
-                \Mail::to($medico->email)->queue(new \App\Mail\ConfirmacaoAgendamento($params));
-            } catch (\Exception $e) {
-                \Log::error("Failed to send admin booking confirmation email: " . $e->getMessage());
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Reservado com sucesso'
-            ]);
-        } else {
-            $cartao = array();
-            if (!empty($request->get('cartao_precadastrado'))) {
-                $cartao = UsersCards::find($request->get('cartao_precadastrado'));
-            }
-
-            $pagseguro = new Pagseguro();
-            $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $request->get('medico'));
-
-            if ($pagamento['status'] == true) {
-
+            /** Fará a cobrança por maquininha */
+            if (!empty($request->get('presencial'))) {
                 /* CRIA TRANSACAO E CREDITO */
-                $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
-                if ($valor_credito > 0)
-                    $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
+                $transacao = null;
+                if ($valor_cobranca > 0)
+                    $transacao = $transacoes_rep->createPresencial($valor_cobranca, $request->get('sala'), $request->get('medico'));
 
-                if (!empty($request->get('gravar_cartao'))) {
-                    $cards_rep = new UsersCardsRepository();
-                    $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
+                if ($valor_credito >= 0 && $valor_credito <= $credito_medico['saldo'])
+                    $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'debito', null);
+                else {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Saldo de créditos insuficiente.'
+                    ]);
                 }
 
                 $ocorrencias = $ocorrencias_rep->gravaIntervalo($data_inicial, $data_final, $horarios_sel, $request->get('medico'), $request->get('sala'), $transacao);
@@ -649,31 +603,81 @@ class AdminController extends Controller
 
                 $params = array();
                 $params['medico'] = $medico->name . " " . $medico->sobrenome;
+                $params['email'] = $medico->email;
                 $params['sala'] = $sala->nome . '-' . $sala->numero;
                 $params['horarios'] = $horarios_sel;
                 $params['data'] = $data_inicial->format('d/m/Y') . " até " . $data_final->format('d/m/Y');
+                $params['credito_selecionado'] = $valor_credito;
+                $params['valor_total'] = $valor_cobranca;
 
-                /*
-                Mail::send('emails.confirmacao_agendamento', $params, function($message) {
-                     $message->to($medico->email, $params['medico'])
-                            ->from('medical_place@email.com','Medical Place') // AQUI PRECISA COLOCAR O NOME E EMAIL DO FROM
-                            ->subject('Agendamento confirmado');
-                });
-                */
-                /**
-                 * Envio de email confirmação
-                 */
+                try {
+                    \Mail::to($medico->email)->queue(new \App\Mail\ConfirmacaoAgendamento($params));
+                } catch (\Exception $e) {
+                    \Log::error("Failed to send admin booking confirmation email: " . $e->getMessage());
+                }
 
                 return response()->json([
                     'status' => true,
-                    'message' => 'Creditado com sucesso'
+                    'message' => 'Reservado com sucesso'
                 ]);
             } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => $pagamento['mensagem']
-                ]);
+                $cartao = array();
+                if (!empty($request->get('cartao_precadastrado'))) {
+                    $cartao = UsersCards::find($request->get('cartao_precadastrado'));
+                }
+
+                $pagamento = ['status' => true, 'retorno' => null];
+                
+                if ($valor_cobranca > 0) {
+                    $pagseguro = new Pagseguro();
+                    $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $request->get('medico'));
+                }
+
+                if ($pagamento['status'] == true) {
+
+                    /* CRIA TRANSACAO E CREDITO */
+                    $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
+                    if ($valor_credito > 0)
+                        $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
+
+                    if (!empty($request->get('gravar_cartao'))) {
+                        $cards_rep = new UsersCardsRepository();
+                        $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
+                    }
+
+                    $ocorrencias = $ocorrencias_rep->gravaIntervalo($data_inicial, $data_final, $horarios_sel, $request->get('medico'), $request->get('sala'), $transacao);
+
+                    /**
+                     * Envio de email confirmação
+                     */
+                    $salas_rep = new SalasRepository();
+                    $sala = $salas_rep->getSala($request->get('sala'));
+
+                    $medico = User::find($request->get('medico'));
+
+                    $params = array();
+                    $params['medico'] = $medico->name . " " . $medico->sobrenome;
+                    $params['sala'] = $sala->nome . '-' . $sala->numero;
+                    $params['horarios'] = $horarios_sel;
+                    $params['data'] = $data_inicial->format('d/m/Y') . " até " . $data_final->format('d/m/Y');
+
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'Creditado com sucesso'
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => false,
+                        'message' => $pagamento['mensagem']
+                    ]);
+                }
             }
+        } catch (\Exception $e) {
+            \Log::error("checkoutAgendamento Error: " . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro interno ao processar agendamento: ' . $e->getMessage()
+            ]);
         }
     }
 }
