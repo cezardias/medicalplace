@@ -24,24 +24,16 @@ class PagSeguro
 
         if (empty($this->url) || empty($this->token)) {
             // Hard fallback if config cache is broken
-            $envPath = base_path('.env');
-            if (file_exists($envPath)) {
-                $envContent = file_get_contents($envPath);
-                $isProd = (config('app.env') == "prod");
-                
-                $urlKey = $isProd ? 'PAGSEGURO_PROD_URL' : 'PAGSEGURO_URL';
-                $emailKey = $isProd ? 'PAGSEGURO_PROD_EMAIL' : 'PAGSEGURO_EMAIL';
-                $tokenKey = $isProd ? 'PAGSEGURO_PROD_TOKEN' : 'PAGSEGURO_TOKEN';
-                
-                if (preg_match('/^'.$urlKey.'=(.*)$/m', $envContent, $m)) $this->url = trim($m[1], " \t\n\r\0\x0B\"'");
-                if (preg_match('/^'.$emailKey.'=(.*)$/m', $envContent, $m)) $this->email = trim($m[1], " \t\n\r\0\x0B\"'");
-                if (preg_match('/^'.$tokenKey.'=(.*)$/m', $envContent, $m)) $this->token = trim($m[1], " \t\n\r\0\x0B\"'");
+            if (config('app.env') == "prod") {
+                $this->url = 'https://api.pagseguro.com';
+                if (empty($this->email)) $this->email = 'financeiro@medicalplace.med.br';
+                if (empty($this->token)) $this->token = '13b29784-5cbf-4884-bc57-0b81485d2004861050e548f6b094a3baa5e710d38ee8ebad-74cc-42ae-9c1e-bc9cfba4bbf0';
+            } else {
+                $this->url = 'https://sandbox.api.pagseguro.com';
+                if (empty($this->email)) $this->email = 'marcelo_sagayama@hotmail.com';
+                if (empty($this->token)) $this->token = '966EAA10D7DD4861AAF3A60D2BCDC6A3';
             }
-            \Log::warning("PAGSEGURO WARNING: Used direct .env fallback because config was empty.");
-        }
-
-        if (empty($this->url)) {
-            \Log::error("PAGSEGURO ERROR: URL is still empty after fallback! Check .env file.");
+            \Log::warning("PAGSEGURO WARNING: Used HARDCODED fallback because config was empty.");
         }
     }
 
@@ -137,10 +129,14 @@ if (!empty($retorno)) {
                 "exp_year" => $exp_data->format('Y'),
                 "security_code" => $cvv,
                 "holder" => [
-                    "name" => $request->get('nome_titular'),
-                    "tax_id" => preg_replace('/\D/', '', $user->cpf)
+                    "name" => $request->get('nome_titular')
                 ]
             ];
+            
+            $tax_id = preg_replace('/\D/', '', $user ? $user->cpf : '');
+            if (!empty($tax_id)) {
+                $card_data["holder"]["tax_id"] = $tax_id;
+            }
         }
 
         $params = [
@@ -160,6 +156,14 @@ if (!empty($retorno)) {
 
         if ($user) {
             $cpf = preg_replace('/\D/', '', $user->cpf);
+            
+            if (empty($cpf)) {
+                return array(
+                    'status' => false,
+                    'mensagem' => 'O PAGSEGURO EXIGE O SEU CPF PARA APROVAR O PAGAMENTO. POR FAVOR, ATUALIZE O SEU PERFIL.'
+                );
+            }
+
             $telefone = preg_replace('/\D/', '', $user->telefone);
             
             // Extract area code (first 2 digits) and number
