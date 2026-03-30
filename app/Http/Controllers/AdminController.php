@@ -40,9 +40,11 @@ class AdminController extends Controller
         $usuarios_rep = new UsuariosRepository();
         $transacoes_rep = new TransacoesRepository();
 
+        \Log::info('Admin Dashboard Filter Request', ['inicio' => $request->get('inicio'), 'final' => $request->get('final')]);
+
         $naoExibir = false;
         if (!empty($request->get('inicio')) && !empty($request->get('final'))) {
-            $periodo_inicio = Carbon::createFromFormat('d/m/Y', $request->get('inicio'));
+            $periodo_inicio = Carbon::createFromFormat('d/m/Y', $request->get('inicio'))->startOfDay();
             if ($request->get('final') == date('d/m/Y')) {
                 $naoExibir = true;
                 $periodo_fim = Carbon::tomorrow();
@@ -59,10 +61,13 @@ class AdminController extends Controller
             $periodo_fim = Carbon::tomorrow(); // Seta para 23:59:59
         }
 
+        \Log::info('Calculated Period', ['start' => $periodo_inicio->toDateTimeString(), 'end' => $periodo_fim->toDateTimeString()]);
+
 
         $total_salas = $salas_rep->getTotalSalas();
         $total_horarios_agendados = $ocorrencias_rep->getHorariosAgendados($periodo_inicio, $periodo_fim);
-        $total_horarios_livres = $ocorrencias_rep->getHorariosLivre($total_salas, $total_horarios_agendados, 1);
+        $dias = $periodo_inicio->diffInDays($periodo_fim->copy()->addSecond()) ?: 1;
+        $total_horarios_livres = $ocorrencias_rep->getHorariosLivre($total_salas, $total_horarios_agendados, $dias);
         $medicos_agendados = $ocorrencias_rep->getMedicosAgendados($periodo_inicio, $periodo_fim);
         $presencial = $transacoes_rep->faturamentoPresencial($periodo_inicio, $periodo_fim);
         $online = $transacoes_rep->faturamentoOnLine($periodo_inicio, $periodo_fim);

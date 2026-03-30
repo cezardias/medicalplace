@@ -205,29 +205,43 @@ class SalasOcorrenciasRepository
     }
 
     public function getTop10Salas($inicio = null, $fim = null) {
-        $where = "WHERE tipo = 'consulta'";
+        $query = DB::table('salas_ocorrencias')
+            ->select('sala_id', DB::raw('COUNT(*) as total'))
+            ->where('tipo', 'consulta');
+
         if ($inicio && $fim) {
-            $where .= " AND (data >= '".$inicio->format('Y-m-d')."' AND data <= '".$fim->format('Y-m-d')."')";
+            $query->whereBetween('data', [$inicio->format('Y-m-d'), $fim->format('Y-m-d')]);
         }
-        $top10salas = DB::select("
-            SELECT * FROM (
-                SELECT COUNT(*) AS total, sala_id FROM salas_ocorrencias {$where} GROUP BY sala_id) sub
-            JOIN salas ON (sub.sala_id = salas.id) ORDER BY sub.total desc limit 10
-        ");
-        return $top10salas;
+
+        $sub = $query->groupBy('sala_id');
+
+        return DB::table('salas')
+            ->joinSub($sub, 'sub', function ($join) {
+                $join->on('salas.id', '=', 'sub.sala_id');
+            })
+            ->orderBy('sub.total', 'desc')
+            ->limit(10)
+            ->get();
     }
 
     public function getTop10Medicos($inicio = null, $fim = null) {
-        $where = "WHERE tipo = 'consulta'";
+        $query = DB::table('salas_ocorrencias')
+            ->select('user_id', DB::raw('COUNT(*) as total'))
+            ->where('tipo', 'consulta');
+
         if ($inicio && $fim) {
-            $where .= " AND (data >= '".$inicio->format('Y-m-d')."' AND data <= '".$fim->format('Y-m-d')."')";
+            $query->whereBetween('data', [$inicio->format('Y-m-d'), $fim->format('Y-m-d')]);
         }
-        $top10medicos = DB::select("
-            SELECT * FROM (
-                SELECT COUNT(*) AS total, user_id FROM salas_ocorrencias {$where} GROUP BY user_id) sub
-            JOIN users ON (sub.user_id = users.id) ORDER BY sub.total desc limit 10
-        ");
-        return $top10medicos;
+
+        $sub = $query->groupBy('user_id');
+
+        return DB::table('users')
+            ->joinSub($sub, 'sub', function ($join) {
+                $join->on('users.id', '=', 'sub.user_id');
+            })
+            ->orderBy('sub.total', 'desc')
+            ->limit(10)
+            ->get();
     }
 
     public function usoPorSala($sala,$inicio,$fim) {

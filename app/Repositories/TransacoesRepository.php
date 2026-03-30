@@ -105,23 +105,20 @@ class TransacoesRepository
     }
 
     public function faturamentoPresencial($inicio,$fim) {
-        $faturamento = DB::select("
-        SELECT sum(valor) as faturamento FROM transacoes 
-        WHERE created_at >= '".$inicio->format('Y-m-d H:i:s')."' 
-        AND created_at <= '".$fim->format('Y-m-d H:i:s')."' 
-        AND tipo = 'presencial'
-        ");
-        return $faturamento[0];
+        \Log::info('faturamentoPresencial Query', ['inicio' => $inicio->toDateTimeString(), 'fim' => $fim->toDateTimeString()]);
+        return DB::table('transacoes')
+            ->where('tipo', 'presencial')
+            ->whereBetween('created_at', [$inicio, $fim])
+            ->select(DB::raw('SUM(valor) as faturamento'))
+            ->first();
     }    
     public function faturamentoOnLine($inicio,$fim) {
-
-        $faturamento = DB::select("
-        SELECT sum(valor) as faturamento FROM transacoes 
-        WHERE created_at >= '".$inicio->format('Y-m-d H:i:s')."' 
-        AND created_at <= '".$fim->format('Y-m-d H:i:s')."' 
-        AND tipo = 'venda_online'
-        ");
-        return $faturamento[0];
+        \Log::info('faturamentoOnLine Query', ['inicio' => $inicio->toDateTimeString(), 'fim' => $fim->toDateTimeString()]);
+        return DB::table('transacoes')
+            ->where('tipo', 'venda_online')
+            ->whereBetween('created_at', [$inicio, $fim])
+            ->select(DB::raw('SUM(valor) as faturamento'))
+            ->first();
     }
 
 
