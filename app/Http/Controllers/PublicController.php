@@ -254,7 +254,7 @@ class PublicController extends Controller
         $pagamento = [];
         if ($valor_total > 0) {
             $pagseguro = new Pagseguro();
-            $pagamento = $pagseguro->charge($request, $valor_total, $cartao, Auth::user()->id);
+            $pagamento = $pagseguro->charge($request, $valor_total, $cartao, Auth::user());
             /*$pagamento['status'] = true;
 
             $dados = (object)[];

@@ -508,19 +508,26 @@ class AdminController extends Controller
             
             if ($valor_cobranca > 0) {
                 $pagseguro = new Pagseguro();
-                $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $request->get('medico'));
+                $medico_obj = User::find($request->get('medico'));
+                $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $medico_obj);
             }
 
             if ($pagamento['status'] == true) {
 
                 /* CRIA TRANSACAO E CREDITO */
-                $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
-                $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
-
-                if (!empty($request->get('gravar_cartao'))) {
-                    $cards_rep = new UsersCardsRepository();
-                    $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
+                if (!empty($pagamento['retorno'])) {
+                    $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
+                    
+                    if (!empty($request->get('gravar_cartao'))) {
+                        $cards_rep = new UsersCardsRepository();
+                        $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
+                    }
+                } else {
+                    // Se não houve retorno (valor 0), cria uma transação tipo "presencial" ou similar que não requer retorno API
+                    $transacao = $transacoes_rep->createPresencial($valor_credito, null, $request->get('medico'));
                 }
+
+                $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
 
                 return response()->json([
                     'status' => true,
@@ -631,7 +638,8 @@ class AdminController extends Controller
                 
                 if ($valor_cobranca > 0) {
                     $pagseguro = new Pagseguro();
-                    $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $request->get('medico'));
+                    $medico_obj = User::find($request->get('medico'));
+                    $pagamento = $pagseguro->charge($request, $valor_cobranca, $cartao, $medico_obj);
                 }
 
                 if ($pagamento['status'] == true) {
@@ -678,6 +686,7 @@ class AdminController extends Controller
                 }
             }
         } catch (\Exception $e) {
+            \Log::error("checkoutAgendamento Error: " . $e->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Erro interno ao processar agendamento: ' . $e->getMessage()

@@ -81,11 +81,18 @@ if (!empty($retorno)) {
         return false;
     }
 
-    public function charge($request,$valor,$cartao = null,$user = null) {
+    public function charge($request, $valor, $cartao = null, $user = null) {
 
         $cvv = $request->get('cvv');
         $valor_cobranca = intval(round($valor * 100));
-        $reference = str_pad($user,5,"0").date('Ymd')."_" . time();
+        
+        // Ensure $user is an object
+        if (is_numeric($user)) {
+            $user = User::find($user);
+        }
+        
+        $user_id = $user ? $user->id : 0;
+        $reference = str_pad($user_id, 5, "0") . date('Ymd') . "_" . time();
 
         $card_data = [];
         if (!empty($cartao)) {
@@ -128,9 +135,53 @@ if (!empty($retorno)) {
             ]
         ];
 
+        if ($user) {
+            $cpf = preg_replace('/\D/', '', $user->cpf);
+            $telefone = preg_replace('/\D/', '', $user->telefone);
+            
+            // Extract area code (first 2 digits) and number
+            if (strlen($telefone) >= 10) {
+                $area = substr($telefone, 0, 2);
+                $number = substr($telefone, 2);
+
+                $params["customer"] = [
+                    "name" => trim($user->name . " " . $user->sobrenome),
+                    "email" => $user->email,
+                    "tax_id" => $cpf,
+                    "phones" => [
+                        [
+                            "country" => "55",
+                            "area" => $area,
+                            "number" => $number,
+                            "type" => "MOBILE"
+                        ]
+                    ]
+                ];
+            } else {
+                $params["customer"] = [
+                    "name" => trim($user->name . " " . $user->sobrenome),
+                    "email" => $user->email,
+                    "tax_id" => $cpf
+                ];
+            }
+        }
+
+        // Add holder info to card data for better approval (Recommended by PagBank)
+        if (!empty($cartao) && $user) {
+            $card_data = [
+                "id" => $cartao->token,
+                "security_code" => $cvv,
+                "holder" => [
+                    "name" => trim($user->name . " " . $user->sobrenome),
+                    "tax_id" => preg_replace('/\D/', '', $user->cpf)
+                ]
+            ];
+            $params["payment_method"]["card"] = $card_data;
+        }
+
         $json_params = json_encode($params);
 
-        Log::info($json_params);
+        \Log::info("PagSeguro Payload: ". $json_params);
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -143,7 +194,6 @@ if (!empty($retorno)) {
             CURLOPT_HTTPHEADER => array(
                 "Content-type: application/json",
                 "Authorization: Bearer ".$this->token,
-                "X-api-version: 1.0",
                 "X-idempotency-key: " . uniqid()
             ),
             CURLOPT_RETURNTRANSFER => true,
@@ -156,10 +206,7 @@ if (!empty($retorno)) {
         $err = curl_error($curl);
         curl_close($curl);
 
-        /*
-        \Log::info("PagSeguro Payload: ". $json_params);
         \Log::info("PagSeguro Response: ". $response);
-        */
 
         if (!empty($err)) {
             \Log::error("PagSeguro cURL Error: " . $err);
