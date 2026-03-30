@@ -13,13 +13,17 @@ class PagSeguro
 
     public function __construct() {
         if (config('app.env') == "prod") {
-            $this->url = config('pagseguro.prod_url');
-            $this->email = config('pagseguro.prod_email');
-            $this->token = config('pagseguro.prod_token');            
+            $this->url = config('pagseguro.prod_url') ?? env('PAGSEGURO_PROD_URL');
+            $this->email = config('pagseguro.prod_email') ?? env('PAGSEGURO_PROD_EMAIL');
+            $this->token = config('pagseguro.prod_token') ?? env('PAGSEGURO_PROD_TOKEN');            
         } else {
-            $this->url = config('pagseguro.url');
-            $this->email = config('pagseguro.email');
-            $this->token = config('pagseguro.token');
+            $this->url = config('pagseguro.url') ?? env('PAGSEGURO_URL');
+            $this->email = config('pagseguro.email') ?? env('PAGSEGURO_EMAIL');
+            $this->token = config('pagseguro.token') ?? env('PAGSEGURO_TOKEN');
+        }
+
+        if (empty($this->url)) {
+            \Log::warning("PAGSEGURO ERROR: URL is empty! Check .env and run php artisan config:clear");
         }
     }
 
