@@ -480,6 +480,7 @@ class AdminController extends Controller
     }
 
     public function checkoutVendaCredito(Request $request)
+    {
         try {
             $valor_credito = str_replace(',', '.', str_replace('.', '', $request->get('valor_credito')));
             $valor_cobranca = str_replace(',', '.', str_replace('.', '', $request->get('valor_cobranca')));
