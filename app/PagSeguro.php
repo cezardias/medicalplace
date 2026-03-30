@@ -13,17 +13,35 @@ class PagSeguro
 
     public function __construct() {
         if (config('app.env') == "prod") {
-            $this->url = config('pagseguro.prod_url') ?? env('PAGSEGURO_PROD_URL');
-            $this->email = config('pagseguro.prod_email') ?? env('PAGSEGURO_PROD_EMAIL');
-            $this->token = config('pagseguro.prod_token') ?? env('PAGSEGURO_PROD_TOKEN');            
+            $this->url = config('pagseguro.prod_url') ?: env('PAGSEGURO_PROD_URL');
+            $this->email = config('pagseguro.prod_email') ?: env('PAGSEGURO_PROD_EMAIL');
+            $this->token = config('pagseguro.prod_token') ?: env('PAGSEGURO_PROD_TOKEN');            
         } else {
-            $this->url = config('pagseguro.url') ?? env('PAGSEGURO_URL');
-            $this->email = config('pagseguro.email') ?? env('PAGSEGURO_EMAIL');
-            $this->token = config('pagseguro.token') ?? env('PAGSEGURO_TOKEN');
+            $this->url = config('pagseguro.url') ?: env('PAGSEGURO_URL');
+            $this->email = config('pagseguro.email') ?: env('PAGSEGURO_EMAIL');
+            $this->token = config('pagseguro.token') ?: env('PAGSEGURO_TOKEN');
+        }
+
+        if (empty($this->url) || empty($this->token)) {
+            // Hard fallback if config cache is broken
+            $envPath = base_path('.env');
+            if (file_exists($envPath)) {
+                $envContent = file_get_contents($envPath);
+                $isProd = (config('app.env') == "prod");
+                
+                $urlKey = $isProd ? 'PAGSEGURO_PROD_URL' : 'PAGSEGURO_URL';
+                $emailKey = $isProd ? 'PAGSEGURO_PROD_EMAIL' : 'PAGSEGURO_EMAIL';
+                $tokenKey = $isProd ? 'PAGSEGURO_PROD_TOKEN' : 'PAGSEGURO_TOKEN';
+                
+                if (preg_match('/^'.$urlKey.'=(.*)$/m', $envContent, $m)) $this->url = trim($m[1], " \t\n\r\0\x0B\"'");
+                if (preg_match('/^'.$emailKey.'=(.*)$/m', $envContent, $m)) $this->email = trim($m[1], " \t\n\r\0\x0B\"'");
+                if (preg_match('/^'.$tokenKey.'=(.*)$/m', $envContent, $m)) $this->token = trim($m[1], " \t\n\r\0\x0B\"'");
+            }
+            \Log::warning("PAGSEGURO WARNING: Used direct .env fallback because config was empty.");
         }
 
         if (empty($this->url)) {
-            \Log::warning("PAGSEGURO ERROR: URL is empty! Check .env and run php artisan config:clear");
+            \Log::error("PAGSEGURO ERROR: URL is still empty after fallback! Check .env file.");
         }
     }
 
