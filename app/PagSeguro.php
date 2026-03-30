@@ -84,64 +84,48 @@ if (!empty($retorno)) {
     public function charge($request,$valor,$cartao = null,$user = null) {
 
         $cvv = $request->get('cvv');
-        $valor_cobranca = $valor * 100;
-        $reference = str_pad($user,5,"0").date('Ymd')."_".time();
+        $valor_cobranca = intval(round($valor * 100));
+        $reference = str_pad($user,5,"0").date('Ymd')."_" . time();
+
+        $card_data = [];
         if (!empty($cartao)) {
-            $card = '
-                "id" : "'.$cartao->token.'",
-                "securyty_code" : "'.$cvv.'"
-            ';
+            $card_data = [
+                "id" => $cartao->token,
+                "security_code" => $cvv
+            ];
         } else {
-            $cartao = \App\Helper\Funcoes::instance()->onlyNumbers($request->get('numero_cartao'));
+            $numero_cartao = \App\Helper\Funcoes::instance()->onlyNumbers($request->get('numero_cartao'));
             $exp_data = Carbon::createFromFormat('m/y',$request->get('validade'));
-            $exp_month = $exp_data->format('m');
-            $exp_year = $exp_data->format('Y');
-            $store = 0;
-            if (!empty($request->get('gravar_cartao')))
-                $store = 1;
-            $titular = $request->get('nome_titular');
-            /*$card = '
-                "number": "'.$cartao.'",
-                "exp_month": "'.$exp_month.'",
-                "exp_year": "'.$exp_year.'",
-                "security_code": "'.$cvv.'",
-		"store": '.$store.',
-                "holder": {
-                    "name": "'.$titular.'"
-                }
-            ';
-	     */
-            $card = '
-                "number": "'.$cartao.'",
-                "exp_month": "'.$exp_month.'",
-                "exp_year": "'.$exp_year.'",
-                "security_code": "'.$cvv.'",
-                "holder": {
-                    "name": "'.$titular.'"
-                }
-            ';
+            
+            $card_data = [
+                "number" => $numero_cartao,
+                "exp_month" => $exp_data->format('m'),
+                "exp_year" => $exp_data->format('Y'),
+                "security_code" => $cvv,
+                "holder" => [
+                    "name" => $request->get('nome_titular')
+                ]
+            ];
         }
 
-        $params = '
-            {
-                "reference_id": "'.$reference.'",
-                "description": "Aluguel de sala para atendimento",
-                "amount": {
-                    "value": '.$valor_cobranca.',
-                    "currency": "BRL"
-                },
-                "payment_method": {
-                    "type": "CREDIT_CARD",
-                    "installments": 1,
-                    "capture": true,
-                    "card": {
-                        '.$card.'
-                    }
-                }
-            }
-        ';
+        $params = [
+            "reference_id" => $reference,
+            "description" => "Aluguel de sala para atendimento",
+            "amount" => [
+                "value" => $valor_cobranca,
+                "currency" => "BRL"
+            ],
+            "payment_method" => [
+                "type" => "CREDIT_CARD",
+                "installments" => 1,
+                "capture" => true,
+                "card" => $card_data
+            ]
+        ];
 
-        Log::info($params);
+        $json_params = json_encode($params);
+
+        Log::info($json_params);
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -157,7 +141,7 @@ if (!empty($retorno)) {
                 "X-idempotency-key: "
             ),
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS => $params
+            CURLOPT_POSTFIELDS => $json_params
             )
         );
 
