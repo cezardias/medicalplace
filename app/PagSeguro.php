@@ -137,13 +137,14 @@ if (!empty($retorno)) {
 
             CURLOPT_SSL_VERIFYPEER => false, // Somente localhost
 
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_URL => "{$this->url}/charges",
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_HTTPHEADER => array(
                 "Content-type: application/json",
                 "Authorization: Bearer ".$this->token,
                 "X-api-version: 1.0",
-                "X-idempotency-key: "
+                "X-idempotency-key: " . uniqid()
             ),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POSTFIELDS => $json_params
@@ -155,14 +156,14 @@ if (!empty($retorno)) {
         $err = curl_error($curl);
         curl_close($curl);
 
-        Log::info($response);
-	    Log::info($this->url."/charges");
+        \Log::info("PagSeguro Payload: ". $json_params);
+        \Log::info("PagSeguro Response: ". $response);
 
         if (!empty($err)) {
-		Log::debug($err);
+            \Log::error("PagSeguro cURL Error: " . $err);
             return array(
                 'status' => false,
-                'mensagem' => 'ERRO AO ENVIAR REQUISIÇÃO. ENTRE EM CONTATO COM O SUPORTE.'
+                'mensagem' => 'ERRO NA COMUNICAÇÃO (TIMEOUT OU REDE). TENTE NOVAMENTE.'
             );
         }
 
@@ -178,27 +179,26 @@ if (!empty($retorno)) {
                 } else {
                     return array(
                         'status' => false,
-                        'mensagem' => $retorno->payment_response->message." (".$retorno->status.")"
+                        'mensagem' => $retorno->payment_response->message
                     );
                 }
             } else {
-                $det_erro = null;
+                $det_erro = "";
                 if (!empty($retorno->error_messages)) {
                     foreach ($retorno->error_messages as $mess) {
-                        $det_erro .= $mess->parameter_name." ";
+                        $det_erro .= $mess->description . " ";
                     }
                 }
                 return array(
                     'status' => false,
-                    'mensagem' => 'VERIFIQUE OS DADOS PREENCHIDOS E TENTE NOVAMENTE. ('.$det_erro.')'
+                    'mensagem' => 'DADOS INVÁLIDOS: '.$det_erro
                 );
             }
         } else {
             return array(
                 'status' => false,
-                'mensagem' => 'VERIFIQUE OS DADOS PREENCHIDOS'
+                'mensagem' => 'RESPOSTA INVÁLIDA DO PAGSEGURO.'
             );
         }
     }
-
 }

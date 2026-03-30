@@ -637,11 +637,15 @@ class AdminController extends Controller
                 if ($pagamento['status'] == true) {
 
                     /* CRIA TRANSACAO E CREDITO */
-                    $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
+                    $transacao = null;
+                    if ($pagamento['retorno']) {
+                        $transacao = $transacoes_rep->createOnline($pagamento['retorno'], null, $request->get('medico'));
+                    }
+                    
                     if ($valor_credito > 0)
-                        $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'credito', $transacao);
+                        $credito = $creditos_rep->grava($request->get('medico'), $valor_credito, 'debito', $transacao);
 
-                    if (!empty($request->get('gravar_cartao'))) {
+                    if (!empty($request->get('gravar_cartao')) && $pagamento['retorno']) {
                         $cards_rep = new UsersCardsRepository();
                         $cards_rep->create($pagamento['retorno']->payment_method->card, $request->get('medico'));
                     }

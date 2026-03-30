@@ -543,6 +543,7 @@
                 method: "POST",
                 data: $('#checkout').serialize(),
                 success: function(retorno) {
+                    console.log("AJAX Success:", retorno);
                     if (retorno.status == false) {
                         toastr["warning"](retorno.message);
                     } else {
@@ -551,10 +552,15 @@
                     }
                 },
                 error: function(xhr) {
+                    console.error("AJAX Error:", xhr.status, xhr.responseText);
                     toastr["error"]("Erro no servidor ao processar o agendamento.");
                 },
                 complete: function() {
+                    console.log("AJAX Complete");
                     $('#exampleModalCenter').modal('hide');
+                    // Force backdrop removal just in case
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
                 }
             });
 
