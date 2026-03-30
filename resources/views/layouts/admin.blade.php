@@ -622,13 +622,11 @@
             $('.abre-menu').removeClass('aberto')
         });
 
-        /* 
         $( function() {
             $( "#datepickerIni" ).datepicker({ dateFormat: 'dd/mm/yy' });
             $( "#datepickerFim" ).datepicker({ dateFormat: 'dd/mm/yy' });
             $( ".datePicker" ).datepicker({ dateFormat: 'dd/mm/yy' });
         } );
-        */
 
         $(document).ready( function () {
             $('.dtable').DataTable(

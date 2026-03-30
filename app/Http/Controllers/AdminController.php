@@ -67,8 +67,8 @@ class AdminController extends Controller
         $presencial = $transacoes_rep->faturamentoPresencial($periodo_inicio, $periodo_fim);
         $online = $transacoes_rep->faturamentoOnLine($periodo_inicio, $periodo_fim);
 
-        $top_salas = $ocorrencias_rep->getTop10Salas();
-        $top_medicos = $ocorrencias_rep->getTop10Medicos();
+        $top_salas = $ocorrencias_rep->getTop10Salas($periodo_inicio, $periodo_fim);
+        $top_medicos = $ocorrencias_rep->getTop10Medicos($periodo_inicio, $periodo_fim);
 
         if ($naoExibir == true) {
             return view('admin.index', [

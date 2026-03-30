@@ -204,19 +204,27 @@ class SalasOcorrenciasRepository
         return true;
     }
 
-    public function getTop10Salas() {
+    public function getTop10Salas($inicio = null, $fim = null) {
+        $where = "WHERE tipo = 'consulta'";
+        if ($inicio && $fim) {
+            $where .= " AND (data >= '".$inicio->format('Y-m-d')."' AND data <= '".$fim->format('Y-m-d')."')";
+        }
         $top10salas = DB::select("
             SELECT * FROM (
-                SELECT COUNT(*) AS total, sala_id FROM salas_ocorrencias WHERE tipo = 'consulta' GROUP BY sala_id) sub
+                SELECT COUNT(*) AS total, sala_id FROM salas_ocorrencias {$where} GROUP BY sala_id) sub
             JOIN salas ON (sub.sala_id = salas.id) ORDER BY sub.total desc limit 10
         ");
         return $top10salas;
     }
 
-    public function getTop10Medicos() {
+    public function getTop10Medicos($inicio = null, $fim = null) {
+        $where = "WHERE tipo = 'consulta'";
+        if ($inicio && $fim) {
+            $where .= " AND (data >= '".$inicio->format('Y-m-d')."' AND data <= '".$fim->format('Y-m-d')."')";
+        }
         $top10medicos = DB::select("
             SELECT * FROM (
-                SELECT COUNT(*) AS total, user_id FROM salas_ocorrencias WHERE tipo = 'consulta' GROUP BY user_id) sub
+                SELECT COUNT(*) AS total, user_id FROM salas_ocorrencias {$where} GROUP BY user_id) sub
             JOIN users ON (sub.user_id = users.id) ORDER BY sub.total desc limit 10
         ");
         return $top10medicos;

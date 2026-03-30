@@ -107,8 +107,9 @@ class TransacoesRepository
     public function faturamentoPresencial($inicio,$fim) {
         $faturamento = DB::select("
         SELECT sum(valor) as faturamento FROM transacoes 
-        WHERE created_at between CAST('".$inicio->format('Y-m-d H:i:s')."' AS DATE) and CAST('".$fim->format('Y-m-d H:i:s')."' AS DATE)
-        and tipo = 'presencial'
+        WHERE created_at >= '".$inicio->format('Y-m-d H:i:s')."' 
+        AND created_at <= '".$fim->format('Y-m-d H:i:s')."' 
+        AND tipo = 'presencial'
         ");
         return $faturamento[0];
     }    
@@ -116,8 +117,9 @@ class TransacoesRepository
 
         $faturamento = DB::select("
         SELECT sum(valor) as faturamento FROM transacoes 
-        WHERE created_at between CAST('".$inicio->format('Y-m-d H:i:s')."' AS DATE) and CAST('".$fim->format('Y-m-d H:i:s')."' AS DATE)
-        and tipo = 'venda_online'
+        WHERE created_at >= '".$inicio->format('Y-m-d H:i:s')."' 
+        AND created_at <= '".$fim->format('Y-m-d H:i:s')."' 
+        AND tipo = 'venda_online'
         ");
         return $faturamento[0];
     }
